@@ -1,7 +1,7 @@
 [![Uni](https://img.shields.io/badge/University-Ghent%20University-brightgreen)](https://img.shields.io/badge/University-Ghent%20University-brightgreen)
 [![AY](https://img.shields.io/badge/Academic%20Year-2021--2022-yellow)](https://img.shields.io/badge/Academic%20Year-2021--2022-yellow)
 
-# The PCM "Power for Computational Models" toolbox 
+# COmputational Power Analysis using Simulations "COMPASS" toolbox 
 
 This toolbox has been developed to estimate the power of obtaining adequate learning rate estimates <img width="28" alt="image" src="https://user-images.githubusercontent.com/73498415/151129769-337c084f-005b-4e56-8b27-6506eac7c684.png"> when using a basic Rescorla-Wagner model (basic RW-model) to mimic participants’ behaviour on a probabilistic reversal learning task. 
 
