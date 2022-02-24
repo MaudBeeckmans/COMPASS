@@ -16,7 +16,7 @@ Rule reversals can happen. Feedback is given on each trial (0 = no reward, 1 = r
 The basic Rescorla-Wagner model (RW-model) is used to mimic participants’ behaviour in this task. 
 The core of the model is formed by the delta-learning rule and the softmax choice rule. 
 The model has two free parameters: the learning rate (LR) and the inverse temperature 
-<img width="17" alt="image" src="https://user-images.githubusercontent.com/73498415/151129877-e1cb8115-b6b9-41b0-bc8e-35f331c0b027.png">
+<img width="10" alt="image" src="https://user-images.githubusercontent.com/73498415/155537785-41edc8eb-e2d7-49a8-9aaa-c8678180d776.png">.
 
 ## Important limitation: the required computational time
 The computational time for these power estimates is quite large. This computational time depends on several factors: the number of trials, the number of participants and the number of repetitions included in the power estimate. Therefore, the option is included to run the power analysis on multiple cores. This happens when the user defines the 'full_speed' option as 1; if this option is activated, all minus two cores on the computer  doing the power analysis will be used.  
