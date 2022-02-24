@@ -119,4 +119,4 @@ Each parameter recovery analysis consists of the following four steps:
 - Supervising professor: Tom Verguts
     * [E-mail me at Tom (dot) Verguts (at) UGent (dot) be](mailto:Tom.Verguts@UGent.be)
 
-**Last edit: 26 January 2022**
+**Last edit: 24 February 2022**
