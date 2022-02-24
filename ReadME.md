@@ -37,8 +37,8 @@ Each parameter recovery analysis consists of the following four steps:
      - _correlation_: <img width="113" alt="image" src="https://user-images.githubusercontent.com/73498415/151130378-6b8ca89b-2cab-4705-8b76-25cb10836898.png">
      - _group_difference_: <img width="103" alt="image" src="https://user-images.githubusercontent.com/73498415/151130416-00e39026-47ee-4edd-a2b9-806047f493cb.png"> (success when <img width="106" alt="image" src="https://user-images.githubusercontent.com/73498415/151130479-162c7e01-6304-4938-af11-6991226d283e.png">)
 
-## How to use the PCM toolbox 
-1. Download all files from this github-folder and store them in the same folder on your computer. https://github.com/CogComNeuroSci/internship-maud/tree/main/PowerAnalysis/Version1.0
+## How to use COMPASS
+1. Download all files from this github-folder and store them in the same folder on your computer.
 
 2. Open Input_file.csv and adapt the variables to match your design and your parameter recovery requirements.
    <img width="634" alt="image" src="https://user-images.githubusercontent.com/73498415/151140185-b217a37f-8e7e-4618-baa7-89c205b28c49.png">
