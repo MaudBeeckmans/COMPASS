@@ -23,7 +23,7 @@ The computational time for these power estimates is quite large. This computatio
 When using the template for the Input_file.csv on GitHub, the power analysis takes ca. 10 minutes when running on a single core and ca. 2 minutes when running on a computer with 16 cores. It is important to realise that any increase in the number of trials, participants or repetitions used for the power analysis will increase the computation time. 
 COMPASS gives an estimate of how long it will take to calculate the power for each line within this Input_file, at the beginning of the execution of each line. This estimate is based on the time it takes to execute a single repetition and calculated by multiplying the total number of repetitions included by the time required for a single repetition, divided by the number of cores that are used in the power analysis. If you want to stop the process whilst running, you can use 'ctrl + C' in the anaconda prompt shell. This will completely stop the execution of the script. 
 
-## Power estimation with the PCM toolbox 
+## Power estimation with COMPASS
 The power to obtain adequate parameter estimates is calculated by repeatedly conducting parameter recovery analyses. 
 This process is repeated in order to estimate the probability or power of a successful parameter recovery analysis. 
 
