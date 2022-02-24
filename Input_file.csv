@@ -1,0 +1,2 @@
+ntrials;nreversals;npp;reward_probability;full_speed;criterion;significance_cutoff;cohens_d;nreps;output_folder
+700;30;30;0.8;1;correlation;0.7;1;10;C:\Users\maudb\Documents
