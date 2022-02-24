@@ -5,7 +5,7 @@
 
 This toolbox has been developed to estimate the power of obtaining adequate learning rate estimates <img width="28" alt="image" src="https://user-images.githubusercontent.com/73498415/151129769-337c084f-005b-4e56-8b27-6506eac7c684.png"> when using a basic Rescorla-Wagner model (basic RW-model) to mimic participants’ behaviour on a probabilistic reversal learning task. 
 
-## The model and task for which the PCM toolbox was developed   
+## The model and task currently implemented in COMPASS   
 ### Probabilistic reversal learning task 
 In this task participants try to maximise the reward they get by implicitly learning the stimulus-response mapping rules. 
 There are two stimuli (coded as 0 and 1) and two possible responses (coded as 0 and 1) in this design. 
