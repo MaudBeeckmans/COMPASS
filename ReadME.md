@@ -3,7 +3,7 @@
 
 # COmputational Power Analysis using Simulations "COMPASS" toolbox 
 
-This toolbox has been developed to estimate the power of obtaining adequate learning rate estimates <img width="10" alt="image" src="https://user-images.githubusercontent.com/73498415/156181828-ee3782a8-c534-4458-82df-0c7b7323f4c9.png"> when using a Rescorla-Wagner model (RW model) to mimic participants’ behaviour on a probabilistic reversal learning task. 
+This toolbox has been developed to estimate the power of obtaining adequate learning rate estimates <img width="15" alt="image" src="https://user-images.githubusercontent.com/73498415/156181828-ee3782a8-c534-4458-82df-0c7b7323f4c9.png"> when using a Rescorla-Wagner model (RW model) to mimic participants’ behaviour on a probabilistic reversal learning task. 
 
 ## The model and task currently implemented in COMPASS   
 ### Probabilistic reversal learning task 
@@ -33,8 +33,8 @@ Each parameter recovery analysis consists of the following four steps:
   2. Simulate data for each participant (= each parameter set)
   3. Estimate the best fitting parameters for each participant given the simulated data. These are the ‘recovered parameters’. 
   4. Evaluate whether the parameter recovery analysis was successful. This depends on the parameter recovery criterion defined by the researcher. 	
-     - _correlation_: <img width="61" alt="image" src="https://user-images.githubusercontent.com/73498415/156185769-cad73153-2b53-4707-a266-67c376a00c79.png">
-     - _group_difference_: <img width="32" alt="image" src="https://user-images.githubusercontent.com/73498415/156185831-2f654264-82a4-44e9-abd3-676033fb6cd9.png"> (success when p_value ≼ cut_off)
+     - _correlation_: <img width="100" alt="image" src="https://user-images.githubusercontent.com/73498415/156185769-cad73153-2b53-4707-a266-67c376a00c79.png">
+     - _group_difference_: <img width="50" alt="image" src="https://user-images.githubusercontent.com/73498415/156185831-2f654264-82a4-44e9-abd3-676033fb6cd9.png"> (success when p_value ≼ cut_off)
 ## How to use COMPASS
 1. Download all files from this github-folder and store them in the same folder on your computer.
 
@@ -57,8 +57,8 @@ Each parameter recovery analysis consists of the following four steps:
      - 1 = (all-2) cores will be used (much faster, recommended unless you need your computer for other intensive tasks such as meetings)
    * _criterion_: correlation or group_difference
      **The criterion that will be used to evaluate the success of the parameter recovery analysis.**
-     - correlation: <img width="44" alt="image" src="https://user-images.githubusercontent.com/73498415/156186624-bf2d4c13-4da9-47bb-a9a6-34c27ddeebbc.png">
-     - group_difference: <img width="157" alt="image" src="https://user-images.githubusercontent.com/73498415/156186716-bf9b9ab2-86bc-4045-9af7-61b0e9996536.png">
+     - correlation: <img width="80" alt="image" src="https://user-images.githubusercontent.com/73498415/156186624-bf2d4c13-4da9-47bb-a9a6-34c27ddeebbc.png">
+     - group_difference: <img width="300" alt="image" src="https://user-images.githubusercontent.com/73498415/156186716-bf9b9ab2-86bc-4045-9af7-61b0e9996536.png">
    * _cut_off_: float 𝜖 [0, 1] 
      **cut-off that will be used to evaluate the success of each repetition**
      - correlation: cut_off = minimally desired correlation - recommended: 0.75
@@ -73,6 +73,8 @@ Each parameter recovery analysis consists of the following four steps:
     This file can contain multiple rows with different requirements or design-options. 
     If the file contains multiple rows, the power will be estimated using the variables defined within each row sequentially. 
     This allows the researcher to elegantly compare the effect of changing a certain variable on the power estimate. 
+    
+    
     <img width="634" alt="image" src="https://user-images.githubusercontent.com/73498415/151140016-1f564b1d-8532-42b2-96da-b3d6a5e5ff63.png">
 
 3. Run the PowerAnalysis.py script using the correct Anaconda 3 environment. 
@@ -92,17 +94,17 @@ Each parameter recovery analysis consists of the following four steps:
 
 4. Check the output in the shell & the stored figure(s) in the _output_folder_
    * _power estimate_: the probability to obtain adequate parameter estimates
-   * _mean failed LR estimates_: the mean % of participants whose learning rate estimate was implausible;
-     an LR estimate is considered implausible when <= 0.1
+   * _mean failed 𝛼 estimates_: the mean % of participants whose learning rate estimate was implausible;
+     an 𝛼 estimate is considered implausible when ≼ 0.1
    * _probability density plot of the Statistic of interest_: a plot visualising the obtained values for the Statistic of interest in all power recovery analyses
      - x-axis: values for the statistic of interest (correlation or p-value)
      - y-axis: probability density for each value
 
     Example output: 
     
-    <img width="577" alt="image" src="https://user-images.githubusercontent.com/73498415/151138147-b33804d4-071a-42df-8cd6-2672523bce81.png">
+    <img width="650" alt="image" src="https://user-images.githubusercontent.com/73498415/151138147-b33804d4-071a-42df-8cd6-2672523bce81.png">
     
-    <img width="466" alt="image" src="https://user-images.githubusercontent.com/73498415/151139153-1d17653d-86a4-4ec7-8c7c-00821b9d2cf9.png">
+    <img width="500" alt="image" src="https://user-images.githubusercontent.com/73498415/151139153-1d17653d-86a4-4ec7-8c7c-00821b9d2cf9.png">
 
 # Contact
 
