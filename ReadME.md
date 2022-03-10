@@ -83,7 +83,7 @@ Each parameter recovery analysis consists of the following four steps:
    * Install Anaconda 3 by following their [installation guide](https://docs.anaconda.com/anaconda/install/windows/)
    * When the installation is complete, open an Anaconda prompt
    * Go to the directory where ```environment.yml``` is located using ```cd```
-   * Now, run: ```conda env create --file power_estimation.yml```
+   * Now, run: ```conda env create --file environment.yml```
    * Allow the installation of all required packages
    
    To execute the power analysis take the following steps: 
