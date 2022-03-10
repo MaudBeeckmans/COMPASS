@@ -631,10 +631,10 @@ def check_input_parameters(ntrials, nreversals, npp, reward_probability, full_sp
         print("nreps = {}; but nreps should be of type integer and should be > 0".format(nreps))
         variables_are_fine = 0
     if type(plot_folder) != str: 
-        print("plot_folder does not exist")
+        print("output_folder does not exist")
         variables_are_fine = 0
     elif not os.path.isdir(plot_folder): 
-        print('plot_folder does not exist')
+        print('output_folder does not exist')
         variables_are_fine = 0
 
     return variables_are_fine 
