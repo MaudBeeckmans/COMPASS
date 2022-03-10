@@ -65,7 +65,7 @@ Each parameter recovery analysis consists of the following four steps:
      - group_difference: cut_off = significance level - recommended: 0.05
    * _nreps_: integer 𝜖 [1, +∞[ 
      **Number of repetitions that will be conducted to estimate the power**
-     - Recommended number: 1000
+     - Recommended number: minimal 100
    * _output_folder_: string
      **Path to the folder where the output-figure(s) will be stored**
      - e.g. "C:\Users\maudb\Downloads"
