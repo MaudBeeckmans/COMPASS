@@ -79,16 +79,16 @@ Each parameter recovery analysis consists of the following four steps:
 
 3. Run the PowerAnalysis.py script using the correct Anaconda 3 environment. 
    
-   To recreate the programming environment (**in Windows**), simply download our power_estimation environment file (environment.yml) and take the following steps:
+   To recreate the programming environment (**in Windows**), simply download our environment file (environment.yml) and take the following steps:
    * Install Anaconda 3 by following their [installation guide](https://docs.anaconda.com/anaconda/install/windows/)
    * When the installation is complete, open an Anaconda prompt
-   * Go to the directory where ```power_estimation.yml``` is located using ```cd```
+   * Go to the directory where ```environment.yml``` is located using ```cd```
    * Now, run: ```conda env create --file power_estimation.yml```
    * Allow the installation of all required packages
    
    To execute the power analysis take the following steps: 
    * Open Anaconda prompt
-   * Now, run: ```conda activate power_estimation```
+   * Now, run: ```conda activate pyPower```
    * Go to the directory where ```Functions.py```, ```PowerAnalysis.py``` and ```Input_file.csv``` are located using ```cd```
    * Now, run: ```python PowerAnalysis.py```
 
