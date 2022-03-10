@@ -102,8 +102,9 @@ Each parameter recovery analysis consists of the following four steps:
 
     Example output: 
     
-    <img width="650" alt="image" src="https://user-images.githubusercontent.com/73498415/151138147-b33804d4-071a-42df-8cd6-2672523bce81.png">
-    <img width="471" alt="image" src="https://user-images.githubusercontent.com/73498415/157639189-d66e2bb3-7b2a-467f-928d-ba3a35200010.png">
+    <img width="800" alt="image" src="https://user-images.githubusercontent.com/73498415/157639967-e9a5643e-9796-416d-a1c4-df43b89f3dc7.png">
+    <img width="500" alt="image" src="https://user-images.githubusercontent.com/73498415/157640378-76d551ef-4524-4d15-8a4b-2174756bd9eb.png">
+    
 # Contact
 
 - Internship student: Maud Beeckmans 
@@ -115,4 +116,4 @@ Each parameter recovery analysis consists of the following four steps:
 - Supervising professor: Tom Verguts
     * [E-mail me at Tom (dot) Verguts (at) UGent (dot) be](mailto:Tom.Verguts@UGent.be)
 
-**Last edit: 1 March 2022**
+**Last edit: 10 March 2022**
