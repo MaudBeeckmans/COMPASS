@@ -38,7 +38,7 @@ Each parameter recovery analysis consists of the following four steps:
 ## How to use COMPASS
 1. Download all files from this github-folder and store them in the same folder on your computer.
 
-2. Open Input_file.csv and adapt the variables to match your design and your parameter recovery requirements.
+2. Open Input_file.csv and adapt the variables to match your design and your parameter recovery requirements. Be sure to adapt the output_folder. 
    <img width="634" alt="image" src="https://user-images.githubusercontent.com/73498415/151140185-b217a37f-8e7e-4618-baa7-89c205b28c49.png">
    * _ntrials_: integer 𝜖 [5, +∞[
      **number of trials within the experiment (minimal 5)**
