@@ -1,0 +1,4 @@
+ntrials;nreversals;npp;mean_LRg1;SD_LRg1;mean_LRg2;SD_LRg2;mean_inverseTemperatureg1;SD_inverseTemperatureg1;mean_inverseTemperatureg2;SD_inverseTemperatureg2;reward_probability;full_speed;criterion;significance_cutoff;cohens_d;nreps;output_folder
+80;1;64;0.193;0.087;0.258;0.126;1.202;0.892;0.979;0.783;0.8;1;group_difference;0.05;1;100;C:\Users\maudb\Documents\Psychologie\Paper_stage\COMPASS-main\Figures_output
+160;1;64;0.193;0.087;0.258;0.126;1.202;0.892;0.979;0.783;0.8;1;group_difference;0.05;1;100;C:\Users\maudb\Documents\Psychologie\Paper_stage\COMPASS-main\Figures_output
+240;1;64;0.193;0.087;0.258;0.126;1.202;0.892;0.979;0.783;0.8;1;group_difference;0.05;1;100;C:\Users\maudb\Documents\Psychologie\Paper_stage\COMPASS-main\Figures_output

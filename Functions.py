@@ -426,6 +426,10 @@ def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntria
     True_LRs =  generate_parameters(mean = LR_distribution[0], std = LR_distribution[1], npp = npp)
     True_inverseTemps = generate_parameters(mean = inverseTemp_distribution[0], std = inverseTemp_distribution[1], npp = npp)
     
+    print("Mean LR: {}, SD LR: {}; min LR: {}, max LR: {}".format(np.round(np.mean(True_LRs), 3), np.round(np.std(True_LRs), 3), 
+                                                                  np.round(np.min(True_LRs), 3), np.round(np.max(True_LRs), 3)))
+    
+    
     # loop over all pp. to do the data generation and parameter estimation 
     # create array that will contain the final LRestimate for each participant this repetition
     LRestimations = np.empty(npp) 
@@ -471,7 +475,7 @@ def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntria
         print("The power analysis will take ca. {} minutes".format(estimated_time))
     return proportion_failed_estimates, Statistic
 
-def groupdifference_repetition(inverseTemp_distribution, LR_distributions, npp_per_group, 
+def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_per_group, 
                                ntrials, start_design, rep, nreps, ncpu, standard_power = False): 
     """
 
@@ -550,7 +554,7 @@ def groupdifference_repetition(inverseTemp_distribution, LR_distributions, npp_p
         ####PART 1: parameter generation for all participants####
         # Define the True params that will be used for each pp in this rep
         True_LRs =  generate_parameters(mean = LR_distributions[group, 0], std = LR_distributions[group, 1], npp = npp_per_group)
-        True_inverseTemps = generate_parameters(mean = inverseTemp_distribution[0], std = inverseTemp_distribution[1], npp = npp_per_group)
+        True_inverseTemps = generate_parameters(mean = inverseTemp_distributions[group, 0], std = inverseTemp_distributions[group, 1], npp = npp_per_group)
         
         # loop over all pp. to do the data generation and parameter estimation 
         if standard_power == True: 

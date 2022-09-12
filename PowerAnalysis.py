@@ -16,7 +16,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 def power_estimation_correlation(npp = 30, ntrials = 480, nreversals = 12, cut_off = 0.7, high_performance = False, 
-                                 nreps = 100, reward_probability = 0.8): 
+                                 nreps = 100, reward_probability = 0.8, mean_LRdistribution = 0.5, SD_LRdistribution = 0.1, 
+                                 mean_inverseTempdistribution = 2.0, SD_inverseTempdistribution = 1.0): 
     """
 
     Parameters
@@ -53,8 +54,8 @@ def power_estimation_correlation(npp = 30, ntrials = 480, nreversals = 12, cut_o
     if high_performance == True: n_cpu = cpu_count() - 2
     else: n_cpu = 1
     pool = Pool(processes = n_cpu)
-    LR_distribution = np.array([0.5, 0.1])
-    inverseTemp_distribution = np.array([2.0, 1.0])
+    LR_distribution = np.array([mean_LRdistribution, SD_LRdistribution])
+    inverseTemp_distribution = np.array([mean_inverseTempdistribution, SD_inverseTempdistribution])
     out = pool.starmap(correlation_repetition, [(inverseTemp_distribution, LR_distribution, npp, ntrials, 
                                                  start_design, rep, nreps, n_cpu) for rep in range(nreps)])
     pool.close()
@@ -69,7 +70,11 @@ def power_estimation_correlation(npp = 30, ntrials = 480, nreversals = 12, cut_o
     return allreps_output, power_estimate
 
 def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 100, cut_off = 0.05, 
-                                     high_performance = False, nreversals = 12, cohens_d = 0.5, reward_probability = 0.8): 
+                                     high_performance = False, nreversals = 12, cohens_d = 0.5, reward_probability = 0.8, 
+                                     mean_LRdistributionG1 = 0.5, SD_LRdistributionG1 = 0.1, 
+                                     mean_LRdistributionG2 = 0.5, SD_LRdistributionG2 = 0.1, 
+                                     mean_inverseTempdistributionG1 = 2.0, SD_inverseTempdistributionG1 = 1.0, 
+                                     mean_inverseTempdistributionG2 = 2.0, SD_inverseTempdistributionG2 = 1.0): 
     """
     Parameters
     ----------
@@ -116,17 +121,24 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
         # Calculate the mean_groupdifference based on cohens_d and with the s_pooled == 0.1
             # formula: cohens_d = (mean1 - mean2)/s_pooled ==> cohens_d * s_pooled = (mean1 - mean2)
             # thus with s_pooled == 0.1: cohens_d * 0.1 = group_difference
-        s_pooled = 0.1
-        group_difference = cohens_d * s_pooled 
-        LR_means = [0.5 - group_difference/2, 0.5 + group_difference/2]
-        LR_distributions = np.array([[LR_means[0], 0.1], [LR_means[1], 0.1]])
         
-        inverseTemp_distribution = np.array([2.0, 1.0])
+        
+        
+        # s_pooled = 0.1
+        # group_difference = cohens_d * s_pooled 
+        # LR_means = [0.5 - group_difference/2, 0.5 + group_difference/2]
+        #LR_distributions = np.array([[LR_means[0], 0.1], [LR_means[1], 0.1]])
+        LR_distributions = np.array([[mean_LRdistributionG1, SD_LRdistributionG1], [mean_LRdistributionG2, SD_LRdistributionG2]])
+        
+        # inverseTemp_distribution = np.array([2.0, 1.0])
+        inverseTemp_distributions = np.array([[mean_inverseTempdistributionG1, SD_inverseTempdistributionG1], 
+                                              [mean_inverseTempdistributionG2, SD_inverseTempdistributionG2]])
+        
         # mean and standard deviation for the true distributions that will be used: 
             # assumed distribution learning rates: normal distribution with mean 0.5 and sd 0.1
             # assumed distribution inverse temperatures: normal distribution with mean 2 and sd 1
         pool = Pool(processes = n_cpu)
-        out = pool.starmap(groupdifference_repetition, [(inverseTemp_distribution, LR_distributions, npp_per_group, 
+        out = pool.starmap(groupdifference_repetition, [(inverseTemp_distributions, LR_distributions, npp_per_group, 
                                                      ntrials, start_design, rep, nreps, n_cpu, False) for rep in range(nreps)])
         # before calling pool.join(), should call pool.close() to indicate that there will be no new processing
         pool.close()
@@ -155,7 +167,7 @@ if __name__ == '__main__':
     parameter_file = pd.read_csv(os.path.join(os.getcwd(), "Input_file.csv"), delimiter = ';')
     
     for i in range(parameter_file.shape[0]):
-        ntrials, nreversals, npp, reward_probability, full_speed, criterion, significance_cutoff, cohens_d, nreps, plot_folder  = parameter_file.loc[i, :]
+        ntrials, nreversals, npp, mean_LRdistributionG1, SD_LRdistributionG1, mean_LRdistributionG2, SD_LRdistributionG2, mean_inverseTempdistributionG1, SD_inverseTempdistributionG1 , mean_inverseTempdistributionG2, SD_inverseTempdistributionG2, reward_probability, full_speed, criterion, significance_cutoff, cohens_d, nreps, plot_folder  = parameter_file.loc[i, :]
         variables_fine = check_input_parameters(ntrials, nreversals, npp, reward_probability, full_speed, criterion, significance_cutoff, cohens_d, nreps, plot_folder)
         if variables_fine == 0: break 
         # should implement all the errors!
@@ -163,7 +175,9 @@ if __name__ == '__main__':
         if parameter_file.loc[i, 'criterion'] == "correlation": 
             output, power_estimate = power_estimation_correlation(npp = npp, ntrials = ntrials, nreps = nreps, cut_off = significance_cutoff, 
                                                high_performance = full_speed, nreversals = nreversals, 
-                                               reward_probability = reward_probability)
+                                               reward_probability = reward_probability, mean_LRdistribution = mean_LRdistributionG1, 
+                                               SD_LRdistribution = SD_LRdistributionG1, mean_inverseTempdistribution = mean_inverseTempdistributionG1, 
+                                               SD_inverseTempdistribution = SD_inverseTempdistributionG1)
             fig, axes = plt.subplots(nrows = 1, ncols = 1)
             sns.kdeplot(output["correlations"], label = "correlations", ax = axes)
             fig.suptitle("P(correlation >= {} with {} pp, {} trials)".format(significance_cutoff, npp, ntrials), fontweight = 'bold')
@@ -172,10 +186,15 @@ if __name__ == '__main__':
             output, power_estimate = power_estimation_groupdifference(npp_per_group = npp, ntrials = ntrials, 
                                                nreps = nreps, cut_off = significance_cutoff, high_performance = full_speed, 
                                                nreversals = nreversals, cohens_d = cohens_d, 
-                                               reward_probability = reward_probability)
+                                               reward_probability = reward_probability, mean_LRdistributionG1=mean_LRdistributionG1, 
+                                               SD_LRdistributionG1=SD_LRdistributionG1, mean_LRdistributionG2=mean_LRdistributionG2, 
+                                               SD_LRdistributionG2=SD_LRdistributionG2, mean_inverseTempdistributionG1 = mean_inverseTempdistributionG1, 
+                                               SD_inverseTempdistributionG1=SD_inverseTempdistributionG1, mean_inverseTempdistributionG2=mean_inverseTempdistributionG2, 
+                                               SD_inverseTempdistributionG2 = SD_inverseTempdistributionG2)
             fig, axes = plt.subplots(nrows = 1, ncols = 1)
             sns.kdeplot(output["p_values"], label = "p_values", ax = axes)
             fig.suptitle("P(p-value <= {}) with {} pp, {} trials".format(significance_cutoff, npp, ntrials), fontweight = 'bold')
+            cohens_d = np.abs(mean_LRdistributionG1-mean_LRdistributionG2)/np.sqrt((SD_LRdistributionG1**2+SD_LRdistributionG2**2)/2)
             axes.set_title("Power = {}% based on {} reps with ES = {}".format(np.round(power_estimate*100, 2), nreps, cohens_d))
         else: print("Criterion not found")
         axes.axvline(x = significance_cutoff, lw = 2, linestyle ="dashed", color ='k', label ='significance_cutoff')
