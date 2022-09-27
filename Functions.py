@@ -10,6 +10,16 @@ import os, time
 from scipy import optimize
 from scipy import stats as stat
 
+
+#%%
+def LR_retransformation(transformed_LR = 1.3):
+    original_LR = np.exp(transformed_LR)/(1+np.exp(transformed_LR))
+    return original_LR
+
+def InverseT_retransformation(transformed_InverseT = 3):
+    original_InverseT = np.exp(transformed_InverseT)
+    return original_InverseT
+
 #%% Functions that are used within other functions in this 'functions' script
 def generate_parameters(mean = 0.5, std = 0.1, npp = 1):
     """
@@ -224,6 +234,10 @@ def likelihood(parameter_set, data):
     Over trials: summed log likelihood = sum(log(L(parameter set | current response))) with the best fitting parameter set yielding the highest summed logL. 
     The function returns -summed_LogL because the optimization function that will be used to find the most likely parameters given the data searches for the minimum value for this likelihood function. 
     """
+#First retransform the transformedLR to the originalLR
+    retransformed_LR = LR_retransformation(parameter_set[0])
+    retransformed_invT = InverseT_retransformation(parameter_set[1])
+
 #Prepare the likelihood estimation process: make sure all relevant variables are defined 
     # the start values for each stimulus-response pair: these are the same as in the simulate_responses function
     values = np.array([[0.5, 0.5], [0.5, 0.5]])
@@ -257,8 +271,8 @@ def likelihood(parameter_set, data):
         #log(P(response|parameter set)) = log(exp(value_responseX*inverse_temperature) / (exp(value_response0*inverse_temperature) + exp(value_response1*inverse_temperature)) with X = current response (0 or 1))
             # which can be simplified to: value_responseX*inverse_temperature - log(exp(value_response0*inverse_temperature) + exp(value_response1*inverse_temperature)) with X = current response 
             # used mathematical rule: log( exp(x) / (exp(x)+exp(y)) ) = x - log(exp(x)+exp(y))
-        #first calculate the probability of each response given the parameter set
-        loglikelihoods = stimulus_weights*parameter_set[1] - np.log(np.sum((np.exp(stimulus_weights[0]*parameter_set[1])+np.exp(stimulus_weights[1]*parameter_set[1]))))
+        #probabilities = np.exp(loglikelihoods) --> this has to be equal to 1 
+        loglikelihoods = stimulus_weights*retransformed_invT - np.log(np.sum((np.exp(stimulus_weights[0]*retransformed_invT)+np.exp(stimulus_weights[1]*retransformed_invT))))
         #then select the probability of the actual response given the parameter set
         current_loglikelihood = loglikelihoods[response]
         
@@ -270,7 +284,7 @@ def likelihood(parameter_set, data):
         # (since this influences the probability of the responses on the next trials)
         PE, updated_value = delta_rule(previous_value = values[stimulus, response], 
                                                 obtained_reward = reward_this_trial, 
-                                                LR = parameter_set[0]) 
+                                                LR = retransformed_LR) 
         values[stimulus, response] = updated_value
     return -summed_logL
 
@@ -426,13 +440,14 @@ def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntria
     True_LRs =  generate_parameters(mean = LR_distribution[0], std = LR_distribution[1], npp = npp)
     True_inverseTemps = generate_parameters(mean = inverseTemp_distribution[0], std = inverseTemp_distribution[1], npp = npp)
     
-    print("Mean LR: {}, SD LR: {}; min LR: {}, max LR: {}".format(np.round(np.mean(True_LRs), 3), np.round(np.std(True_LRs), 3), 
-                                                                  np.round(np.min(True_LRs), 3), np.round(np.max(True_LRs), 3)))
+    # print("Mean LR: {}, SD LR: {}; min LR: {}, max LR: {}".format(np.round(np.mean(True_LRs), 3), np.round(np.std(True_LRs), 3), 
+    #                                                               np.round(np.min(True_LRs), 3), np.round(np.max(True_LRs), 3)))
     
     
     # loop over all pp. to do the data generation and parameter estimation 
     # create array that will contain the final LRestimate for each participant this repetition
     LRestimations = np.empty(npp) 
+    invTestimations = np.empty(npp) 
     for pp in range(npp): 
         
         ####Part 2: Data simulation for this participant####
@@ -443,25 +458,22 @@ def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntria
         start_design[:, 2] = responses
         
         ####Part 3: parameter estimation for this participant####
-        number_of_optimalizations = 0
-        estimated_LR = 0
-        while estimated_LR < 0.01 and number_of_optimalizations < 5:
-            start_params = np.concatenate([np.random.rand(1), np.random.uniform(0.1, 10, 1)])
-            x_bounds = optimize.Bounds([0, 0.1], [2, 1000])
-            optimization_output = optimize.minimize(likelihood, start_params, args =(tuple([start_design])), 
-                                            method = 'Nelder-Mead', bounds = x_bounds, 
-                                            options = {'maxfev':1000, 'xatol':0.001, 'return_all':1})
-            estimated_parameters = optimization_output['x']
-            estimated_LR = estimated_parameters[0]
-            number_of_optimalizations += 1
-        if estimated_LR < 0.01: # if the final LR estimate is implausible: 
-            nfailed_estimates += 1 # increase the number of failed estimates this repetition with 1
-            # store the pp for which the estimation was failed, in order to delete this pp. later on 
-            failed_estimates = np.append(failed_estimates, pp)
-            
+        start_params = np.random.uniform(-4.5, 4.5), np.random.uniform(-4.6, 2)
+        optimization_output = optimize.minimize(likelihood, start_params, args =(tuple([start_design])), 
+                                        method = 'Nelder-Mead',
+                                        options = {'maxfev':1000, 'xatol':0.001, 'return_all':1})
+        estimated_parameters = optimization_output['x']
+        estimated_LR = LR_retransformation(estimated_parameters[0])
+        estimated_invT = InverseT_retransformation(estimated_parameters[1])
+        
         LRestimations[pp] = estimated_LR
-
-    proportion_failed_estimates = np.round(nfailed_estimates / npp, 3)
+        invTestimations[pp] = estimated_invT
+    ## Checking some stuff
+    # print("\n")
+    # print(np.round(LRestimations, 3))
+    # print(np.round(invTestimations, 3))
+    
+    
     ####Part 4: correlation between true & estimated learning rates####
     # if the estimation failed for a certain participant, delete this participant from the correlation estimation for this repetition
     if nfailed_estimates == 0: 
@@ -474,7 +486,8 @@ def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntria
         estimated_seconds = t1 * np.ceil(nreps / ncpu)
         estimated_time = np.ceil(estimated_seconds / 60)
         print("The power analysis will take ca. {} minutes".format(estimated_time))
-    return proportion_failed_estimates, Statistic
+    # return proportion_failed_estimates, Statistic
+    return Statistic
 
 def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_per_group, 
                                ntrials, start_design, rep, nreps, ncpu, standard_power = False): 
@@ -545,12 +558,9 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
     """
     if rep == 0: 
         t0 = time.time()
-    nfailed_estimates = 0 # keep track of number of failed estimates per repetition
-    failed_estimates_g0 = np.array([], dtype = int)
-    failed_estimates_g1 = np.array([], dtype = int) # keep track of which pp param. estimation failed for 
-        # so we can delete these pp. in the correlation or group difference estimation
     # create array that will contain the final LRestimate for each participant this repetition
     LRestimations = np.empty([2, npp_per_group]) 
+    InvTestimations = np.empty([2, npp_per_group])
     for group in range(2):
         ####PART 1: parameter generation for all participants####
         # Define the True params that will be used for each pp in this rep
@@ -560,6 +570,7 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
         # loop over all pp. to do the data generation and parameter estimation 
         if standard_power == True: 
             LRestimations[group, :] = True_LRs
+            InvTestimations[group, :] = True_inverseTemps
         else: 
             for pp in range(npp_per_group): 
                 ####Part 2: Data simulation for this participant####
@@ -571,40 +582,26 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
                 
                 ####Part 3: parameter estimation for this participant####
                 # use gradient descent to find the optimal parameters for this participant
-                number_of_optimalizations = 0
-                estimated_LR = 0
-                while estimated_LR < 0.01 and number_of_optimalizations < 5:
-                    start_params = np.concatenate([np.random.rand(1), np.random.uniform(0.1, 10, 1)])
-                    x_bounds = optimize.Bounds([0, 0.1], [2, 1000])
-                    optimization_output = optimize.minimize(likelihood, start_params, args =(tuple([start_design])), 
-                                                    method = 'Nelder-Mead', bounds = x_bounds, 
-                                                    options = {'maxfev':1000, 'xatol':0.001, 'return_all':0})
-                    estimated_parameters = optimization_output['x']
-                    estimated_LR = estimated_parameters[0]
-                    number_of_optimalizations += 1
-                    
-                if estimated_LR < 0.01: # if the final LR estimate is implausible:  
-                    # increase the number of failed estimates this repetition with 1
-                    nfailed_estimates += 1
-                    # store the pp for which the estimation was failed, in order to delete this pp. later on 
-                    if group == 0: failed_estimates_g0 = np.append(failed_estimates_g0, pp)
-                    else: failed_estimates_g1 = np.append(failed_estimates_g1, pp)
-                    
+                
+                start_params = np.random.uniform(-4.5, 4.5), np.random.uniform(-4.6, 2)
+                optimization_output = optimize.minimize(likelihood, start_params, args =(tuple([start_design])), 
+                                                method = 'Nelder-Mead',
+                                                options = {'maxfev':1000, 'xatol':0.001, 'return_all':1})
+                estimated_parameters = optimization_output['x']
+                estimated_LR = LR_retransformation(estimated_parameters[0])
+                estimated_invT = InverseT_retransformation(estimated_parameters[1])
+                
                 LRestimations[group, pp] = estimated_LR
-        
-    # keep track of the proportion of estimates that failed this repetition 
-    propfailed_estimates = np.round(nfailed_estimates / (npp_per_group*2), 3)
-    
-    # first delete the participants for which the estimates failed
-    LRestimations_g0 = np.delete(LRestimations[0, :], failed_estimates_g0)
-    LRestimations_g1 = np.delete(LRestimations[1, :], failed_estimates_g1)
-    Statistic, pValue = stat.ttest_ind(LRestimations_g0, LRestimations_g1, alternative = 'less')
+                InvTestimations[group, pp] = estimated_invT
+            
+            
+    Statistic, pValue = stat.ttest_ind(LRestimations[0, :], LRestimations[1, :], alternative = 'less')
     if rep == 0: 
         t1 = time.time() - t0
         estimated_seconds = t1 * nreps / ncpu
         estimated_time = np.ceil(estimated_seconds / 60)
         print("The power analysis will take ca. {} minutes".format(estimated_time))
-    return propfailed_estimates, pValue
+    return pValue
 
 #%%
 def check_input_parameters(ntrials, nreversals, npp, reward_probability, full_speed, criterion, significance_cutoff, cohens_d, nreps, plot_folder):

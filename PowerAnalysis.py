@@ -61,12 +61,16 @@ def power_estimation_correlation(npp = 30, ntrials = 480, nreversals = 12, cut_o
     pool.close()
     pool.join()
     
-    allreps_output = pd.DataFrame(out, columns = ['propfailed_estimates', 'correlations'])
-    mean_propfailed_estimates = np.mean(allreps_output['propfailed_estimates'])
+    # allreps_output = pd.DataFrame(out, columns = ['propfailed_estimates', 'correlations'])
+    # mean_propfailed_estimates = np.mean(allreps_output['propfailed_estimates'])
+    
+    allreps_output = pd.DataFrame(out, columns = ['correlations'])
+    
+    
     power_estimate = np.mean((allreps_output['correlations'] >= cut_off)*1)
     print(str("\nPower to obtain a correlation(true_param, param_estim) >= {}".format(cut_off) 
           + " with {} trials and {} participants: {}%".format(ntrials, npp, power_estimate*100)))
-    print("\nMean failed learning rate estimates: {}%".format(np.round(mean_propfailed_estimates*100, 2)))
+    # print("\nMean failed learning rate estimates: {}%".format(np.round(mean_propfailed_estimates*100, 2)))
     return allreps_output, power_estimate
 
 def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 100, cut_off = 0.05, 
@@ -129,15 +133,16 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
         # before calling pool.join(), should call pool.close() to indicate that there will be no new processing
         pool.close()
         pool.join()
-        allreps_output = pd.DataFrame(out, columns = ['propfailed_estimates', 'p_values'])
-        mean_propfailed_estimates = np.mean(allreps_output['propfailed_estimates'])
+        # allreps_output = pd.DataFrame(out, columns = ['propfailed_estimates', 'p_values'])
+        allreps_output = pd.DataFrame(out, columns = ['p_values'])
+        
         # check for which % of repetitions the group difference was significant 
         # note that we're working with a one-sided t-test (if interested in two-sided need to divide the p-value obtained at each rep with 2)
         power_estimate = np.mean((allreps_output['p_values'] <= cut_off))
         print(str("\nPower to detect a significant group difference when the estimated effect size d = {}".format(cohens_d)
               + " with {} trials and {} participants per group: {}%".format(ntrials, 
                                                                          npp_per_group, power_estimate*100)))
-        print("\nMean failed learning rate estimates per repetition: {}%".format(np.round(mean_propfailed_estimates*100, 2)))
+        # print("\nMean failed learning rate estimates per repetition: {}%".format(np.round(mean_propfailed_estimates*100, 2)))
         return allreps_output, power_estimate
 
 #%%
@@ -154,6 +159,7 @@ if __name__ == '__main__':
     InputFile_path = os.path.join(os.getcwd(), InputFile_name)
     InputParameters = pd.read_csv(InputFile_path, delimiter = ';')
     InputDictionary = InputParameters.to_dict()
+    print(InputDictionary)
     
     # variables_fine = check_input_parameters(ntrials, nreversals, npp, reward_probability, full_speed, criterion, significance_cutoff, cohens_d, nreps, plot_folder)
     # if variables_fine == 0: break 
