@@ -70,7 +70,7 @@ def power_estimation_correlation(npp = 30, ntrials = 480, nreversals = 12, cut_o
     return allreps_output, power_estimate
 
 def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 100, cut_off = 0.05, 
-                                     high_performance = False, nreversals = 12, cohens_d = 0.5, reward_probability = 0.8, 
+                                     high_performance = False, nreversals = 12, reward_probability = 0.8, 
                                      mean_LRdistributionG1 = 0.5, SD_LRdistributionG1 = 0.1, 
                                      mean_LRdistributionG2 = 0.5, SD_LRdistributionG2 = 0.1, 
                                      mean_inverseTempdistributionG1 = 2.0, SD_inverseTempdistributionG1 = 1.0, 
@@ -90,8 +90,6 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
         Defines whether multiple cores on the computer will be used in order to estimate the power. 
     nreversals : integer
         The number of rule-reversals that will occur in the experiment. Should be smaller than ntrials.
-    cohens_d : float 
-        Estimated effect size included in the power analysis. 
     reward_probability : float (element within [0, 1]), optional
         The probability that reward will be congruent with the current stimulus-response mapping rule. The default is 0.8.
 
@@ -118,25 +116,13 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
                                 alternative = 'larger')
         print("\nPower if estimates would be perfect: {}%".format(np.round(power, 4)*100))    
         
-        # Calculate the mean_groupdifference based on cohens_d and with the s_pooled == 0.1
-            # formula: cohens_d = (mean1 - mean2)/s_pooled ==> cohens_d * s_pooled = (mean1 - mean2)
-            # thus with s_pooled == 0.1: cohens_d * 0.1 = group_difference
         
         
-        
-        # s_pooled = 0.1
-        # group_difference = cohens_d * s_pooled 
-        # LR_means = [0.5 - group_difference/2, 0.5 + group_difference/2]
-        #LR_distributions = np.array([[LR_means[0], 0.1], [LR_means[1], 0.1]])
         LR_distributions = np.array([[mean_LRdistributionG1, SD_LRdistributionG1], [mean_LRdistributionG2, SD_LRdistributionG2]])
-        
-        # inverseTemp_distribution = np.array([2.0, 1.0])
         inverseTemp_distributions = np.array([[mean_inverseTempdistributionG1, SD_inverseTempdistributionG1], 
                                               [mean_inverseTempdistributionG2, SD_inverseTempdistributionG2]])
         
-        # mean and standard deviation for the true distributions that will be used: 
-            # assumed distribution learning rates: normal distribution with mean 0.5 and sd 0.1
-            # assumed distribution inverse temperatures: normal distribution with mean 2 and sd 1
+        
         pool = Pool(processes = n_cpu)
         out = pool.starmap(groupdifference_repetition, [(inverseTemp_distributions, LR_distributions, npp_per_group, 
                                                      ntrials, start_design, rep, nreps, n_cpu, False) for rep in range(nreps)])
@@ -157,49 +143,86 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
 #%%
 
 
-import os 
+import os, sys 
 
 if __name__ == '__main__': 
-    start_time = datetime.now()
+    criterion = sys.argv[1:]
+    assert len(criterion) == 1
+    criterion = criterion[0]
     
-    print("Power analysis started at {}.".format(start_time))
+    InputFile_name = "InputFile_{}.csv".format(criterion)
+    InputFile_path = os.path.join(os.getcwd(), InputFile_name)
+    InputParameters = pd.read_csv(InputFile_path, delimiter = ';')
+    InputDictionary = InputParameters.to_dict()
     
-    parameter_file = pd.read_csv(os.path.join(os.getcwd(), "Input_file.csv"), delimiter = ';')
+    # variables_fine = check_input_parameters(ntrials, nreversals, npp, reward_probability, full_speed, criterion, significance_cutoff, cohens_d, nreps, plot_folder)
+    # if variables_fine == 0: break 
+    # # should implement all the errors!
+    # print("Power estimation for row {} in the input_file has begun, time for coffee whilst waiting :).".format(i))
     
-    for i in range(parameter_file.shape[0]):
-        ntrials, nreversals, npp, mean_LRdistributionG1, SD_LRdistributionG1, mean_LRdistributionG2, SD_LRdistributionG2, mean_inverseTempdistributionG1, SD_inverseTempdistributionG1 , mean_inverseTempdistributionG2, SD_inverseTempdistributionG2, reward_probability, full_speed, criterion, significance_cutoff, cohens_d, nreps, plot_folder  = parameter_file.loc[i, :]
-        variables_fine = check_input_parameters(ntrials, nreversals, npp, reward_probability, full_speed, criterion, significance_cutoff, cohens_d, nreps, plot_folder)
-        if variables_fine == 0: break 
-        # should implement all the errors!
-        print("Power estimation for row {} in the input_file has begun, time for coffee whilst waiting :).".format(i))
-        if parameter_file.loc[i, 'criterion'] == "correlation": 
-            output, power_estimate = power_estimation_correlation(npp = npp, ntrials = ntrials, nreps = nreps, cut_off = significance_cutoff, 
+    
+    for row in range(InputParameters.shape[0]): 
+        #Calculate how long it takes to do a power estimation 
+        start_time = datetime.now()
+        print("Power estimation started at {}.".format(start_time))
+        
+        #Extract all values that are the same regardless of the criterion used 
+        ntrials = InputDictionary['ntrials'][row]
+        nreversals = InputDictionary['nreversals'][row]
+        reward_probability = InputDictionary['reward_probability'][row]
+        nreps = InputDictionary['nreps'][row]
+        full_speed = InputDictionary['full_speed'][row]
+        output_folder = InputDictionary['output_folder'][row]
+        
+        if criterion == "IC":
+            npp = InputDictionary['npp'][row]
+            meanLR, sdLR = InputDictionary['meanLR'][row], InputDictionary['sdLR'][row]
+            meanInverseT, sdInverseT = InputDictionary['meanInverseTemperature'][row], InputDictionary['sdInverseTemperature'][row]
+            tau = InputDictionary['tau'][row]
+            
+            output, power_estimate = power_estimation_correlation(npp = npp, ntrials = ntrials, nreps = nreps, 
+                                                                  cut_off = tau, 
                                                high_performance = full_speed, nreversals = nreversals, 
-                                               reward_probability = reward_probability, mean_LRdistribution = mean_LRdistributionG1, 
-                                               SD_LRdistribution = SD_LRdistributionG1, mean_inverseTempdistribution = mean_inverseTempdistributionG1, 
-                                               SD_inverseTempdistribution = SD_inverseTempdistributionG1)
+                                               reward_probability = reward_probability, mean_LRdistribution = meanLR, 
+                                               SD_LRdistribution = sdLR, mean_inverseTempdistribution = meanInverseT, 
+                                               SD_inverseTempdistribution = sdInverseT)
             fig, axes = plt.subplots(nrows = 1, ncols = 1)
             sns.kdeplot(output["correlations"], label = "correlations", ax = axes)
-            fig.suptitle("P(correlation >= {} with {} pp, {} trials)".format(significance_cutoff, npp, ntrials), fontweight = 'bold')
+            fig.suptitle("P(correlation >= {} with {} pp, {} trials)".format(tau, npp, ntrials), fontweight = 'bold')
             axes.set_title("Power = {}% based on {} reps".format(np.round(power_estimate*100, 2), nreps))
-        elif parameter_file.loc[i, 'criterion'] == "group_difference": 
-            output, power_estimate = power_estimation_groupdifference(npp_per_group = npp, ntrials = ntrials, 
-                                               nreps = nreps, cut_off = significance_cutoff, high_performance = full_speed, 
-                                               nreversals = nreversals, cohens_d = cohens_d, 
-                                               reward_probability = reward_probability, mean_LRdistributionG1=mean_LRdistributionG1, 
-                                               SD_LRdistributionG1=SD_LRdistributionG1, mean_LRdistributionG2=mean_LRdistributionG2, 
-                                               SD_LRdistributionG2=SD_LRdistributionG2, mean_inverseTempdistributionG1 = mean_inverseTempdistributionG1, 
-                                               SD_inverseTempdistributionG1=SD_inverseTempdistributionG1, mean_inverseTempdistributionG2=mean_inverseTempdistributionG2, 
-                                               SD_inverseTempdistributionG2 = SD_inverseTempdistributionG2)
+            axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
+            
+        elif criterion == "GD": 
+            npp_pergroup = InputDictionary['npp_group'][row]
+            meanLR_g1, sdLR_g1 = InputDictionary['meanLR_g1'][row], InputDictionary['sdLR_g1'][row]
+            meanLR_g2, sdLR_g2 = InputDictionary['meanLR_g2'][row], InputDictionary['sdLR_g2'][row]
+            meanInverseT_g1, sdInverseT_g1 = InputDictionary['meanInverseTemperature_g1'][row], InputDictionary['sdInverseTemperature_g1'][row]
+            meanInverseT_g2, sdInverseT_g2 = InputDictionary['meanInverseTemperature_g2'][row], InputDictionary['sdInverseTemperature_g2'][row]
+            typeIerror = InputDictionary['TypeIerror'][row]
+            
+            cohens_d = np.abs(meanLR_g1-meanLR_g2)/np.sqrt((sdLR_g1**2+sdLR_g2**2)/2)
+            
+            
+            output, power_estimate = power_estimation_groupdifference(npp_per_group = npp_pergroup, ntrials = ntrials, 
+                                               nreps = nreps, cut_off = typeIerror, high_performance = full_speed, 
+                                               nreversals = nreversals, reward_probability = reward_probability, 
+                                               mean_LRdistributionG1 = meanLR_g1, SD_LRdistributionG1 = sdLR_g1, 
+                                               mean_LRdistributionG2 = meanLR_g2, SD_LRdistributionG2=sdLR_g2, 
+                                               mean_inverseTempdistributionG1 = meanInverseT_g1, SD_inverseTempdistributionG1 = sdInverseT_g1, 
+                                               mean_inverseTempdistributionG2 = meanInverseT_g2, SD_inverseTempdistributionG2 = sdInverseT_g2)
             fig, axes = plt.subplots(nrows = 1, ncols = 1)
             sns.kdeplot(output["p_values"], label = "p_values", ax = axes)
-            fig.suptitle("P(p-value <= {}) with {} pp, {} trials".format(significance_cutoff, npp, ntrials), fontweight = 'bold')
-            cohens_d = np.abs(mean_LRdistributionG1-mean_LRdistributionG2)/np.sqrt((SD_LRdistributionG1**2+SD_LRdistributionG2**2)/2)
+            fig.suptitle("P(p-value <= {}) with {} pp, {} trials".format(typeIerror, npp_pergroup, ntrials), fontweight = 'bold')
             axes.set_title("Power = {}% based on {} reps with ES = {}".format(np.round(power_estimate*100, 2), nreps, cohens_d))
+            axes.axvline(x = typeIerror, lw = 2, linestyle ="dashed", color ='k', label ='typeIerror')
+        
         else: print("Criterion not found")
-        axes.axvline(x = significance_cutoff, lw = 2, linestyle ="dashed", color ='k', label ='significance_cutoff')
+        #final adaptations to the output figure & store the figure 
         fig.legend(loc = 'center right')
         fig.tight_layout()
+        fig.savefig(os.path.join(output_folder, 'Distributionplot_{}_line{}.jpg'.format(criterion, row)))
+        
+        # measure how long the power estimation lasted 
         end_time = datetime.now()
         print("\nPower analysis ended at {}; run lasted {} hours.".format(end_time, end_time-start_time))
-        fig.savefig(os.path.join(plot_folder, 'Distributionplot_line{}.jpg'.format(i)))
+        

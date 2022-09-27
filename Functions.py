@@ -434,6 +434,7 @@ def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntria
     # create array that will contain the final LRestimate for each participant this repetition
     LRestimations = np.empty(npp) 
     for pp in range(npp): 
+        
         ####Part 2: Data simulation for this participant####
         # generate the responses for this participant 
         responses = simulate_responses(simulation_LR=True_LRs[pp], simulation_inverseTemp=True_inverseTemps[pp], 
