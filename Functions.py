@@ -601,7 +601,7 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
         estimated_seconds = t1 * nreps / ncpu
         estimated_time = np.ceil(estimated_seconds / 60)
         print("The power analysis will take ca. {} minutes".format(estimated_time))
-    return pValue
+    return Statistic, pValue
 
 #%%
 def check_input_parameters(ntrials, nreversals, npp, reward_probability, full_speed, criterion, significance_cutoff, cohens_d, nreps, plot_folder):

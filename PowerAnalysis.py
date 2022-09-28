@@ -14,6 +14,7 @@ from statsmodels.stats.power import tt_ind_solve_power
 from datetime import datetime
 import seaborn as sns
 import matplotlib.pyplot as plt
+from scipy import stats as stat
 
 def power_estimation_correlation(npp = 30, ntrials = 480, nreversals = 12, cut_off = 0.7, high_performance = False, 
                                  nreps = 100, reward_probability = 0.8, mean_LRdistribution = 0.5, SD_LRdistribution = 0.1, 
@@ -73,7 +74,7 @@ def power_estimation_correlation(npp = 30, ntrials = 480, nreversals = 12, cut_o
     # print("\nMean failed learning rate estimates: {}%".format(np.round(mean_propfailed_estimates*100, 2)))
     return allreps_output, power_estimate
 
-def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 100, cut_off = 0.05, 
+def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 100, typeIerror = 0.05, 
                                      high_performance = False, nreversals = 12, reward_probability = 0.8, 
                                      mean_LRdistributionG1 = 0.5, SD_LRdistributionG1 = 0.1, 
                                      mean_LRdistributionG2 = 0.5, SD_LRdistributionG2 = 0.1, 
@@ -116,7 +117,7 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
     else: n_cpu = 1
     if __name__ == '__main__': 
         # First: check what the power is when true parameters would be recoverable 
-        power = tt_ind_solve_power(nobs1 = npp_per_group, ratio = 1, effect_size = cohens_d, alpha = cut_off, power = None, 
+        power = tt_ind_solve_power(nobs1 = npp_per_group, ratio = 1, effect_size = cohens_d, alpha = typeIerror, power = None, 
                                 alternative = 'larger')
         print("\nPower if estimates would be perfect: {}%".format(np.round(power, 4)*100))    
         
@@ -134,11 +135,11 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
         pool.close()
         pool.join()
         # allreps_output = pd.DataFrame(out, columns = ['propfailed_estimates', 'p_values'])
-        allreps_output = pd.DataFrame(out, columns = ['p_values'])
+        allreps_output = pd.DataFrame(out, columns = ['Statistic', 'PValue'])
         
         # check for which % of repetitions the group difference was significant 
         # note that we're working with a one-sided t-test (if interested in two-sided need to divide the p-value obtained at each rep with 2)
-        power_estimate = np.mean((allreps_output['p_values'] <= cut_off))
+        power_estimate = np.mean((allreps_output['PValue'] <= typeIerror))
         print(str("\nPower to detect a significant group difference when the estimated effect size d = {}".format(cohens_d)
               + " with {} trials and {} participants per group: {}%".format(ntrials, 
                                                                          npp_per_group, power_estimate*100)))
@@ -155,7 +156,7 @@ if __name__ == '__main__':
     assert len(criterion) == 1
     criterion = criterion[0]
     
-    InputFile_name = "InputFile_{}.csv".format(criterion)
+    InputFile_name = "InputFile_{}_Goris.csv".format(criterion)
     InputFile_path = os.path.join(os.getcwd(), InputFile_name)
     InputParameters = pd.read_csv(InputFile_path, delimiter = ';')
     InputDictionary = InputParameters.to_dict()
@@ -210,17 +211,23 @@ if __name__ == '__main__':
             
             
             output, power_estimate = power_estimation_groupdifference(npp_per_group = npp_pergroup, ntrials = ntrials, 
-                                               nreps = nreps, cut_off = typeIerror, high_performance = full_speed, 
+                                               nreps = nreps, typeIerror = typeIerror, high_performance = full_speed, 
                                                nreversals = nreversals, reward_probability = reward_probability, 
                                                mean_LRdistributionG1 = meanLR_g1, SD_LRdistributionG1 = sdLR_g1, 
                                                mean_LRdistributionG2 = meanLR_g2, SD_LRdistributionG2=sdLR_g2, 
                                                mean_inverseTempdistributionG1 = meanInverseT_g1, SD_inverseTempdistributionG1 = sdInverseT_g1, 
                                                mean_inverseTempdistributionG2 = meanInverseT_g2, SD_inverseTempdistributionG2 = sdInverseT_g2)
             fig, axes = plt.subplots(nrows = 1, ncols = 1)
-            sns.kdeplot(output["p_values"], label = "p_values", ax = axes)
+            sns.kdeplot(output["Statistic"], label = "T", ax = axes)
             fig.suptitle("P(p-value <= {}) with {} pp, {} trials".format(typeIerror, npp_pergroup, ntrials), fontweight = 'bold')
             axes.set_title("Power = {}% based on {} reps with ES = {}".format(np.round(power_estimate*100, 2), nreps, cohens_d))
-            axes.axvline(x = typeIerror, lw = 2, linestyle ="dashed", color ='k', label ='typeIerror')
+            # Calculate tau based on the typeIerror and the df
+            tau = stat.t.ppf(1-typeIerror, npp_pergroup*2-1)
+            axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
+            
+            
+            
+            
         
         else: print("Criterion not found")
         #final adaptations to the output figure & store the figure 
