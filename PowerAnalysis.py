@@ -4,17 +4,21 @@ Created on Tue Dec 14 11:04:23 2021
 
 @author: maudb
 """
+HPC = False
 
 import numpy as np
 import pandas as pd 
 from multiprocessing import Pool, cpu_count
 from Functions import create_design, correlation_repetition, groupdifference_repetition, check_input_parameters
 from scipy import optimize
-from statsmodels.stats.power import tt_ind_solve_power
-from datetime import datetime
-import seaborn as sns
-import matplotlib.pyplot as plt
 from scipy import stats as stat
+from datetime import datetime
+
+if HPC == False: 
+    from statsmodels.stats.power import tt_ind_solve_power
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+
 
 def power_estimation_correlation(npp = 30, ntrials = 480, nreversals = 12, cut_off = 0.7, high_performance = False, 
                                  nreps = 100, reward_probability = 0.8, mean_LRdistribution = 0.5, SD_LRdistribution = 0.1, 
@@ -52,7 +56,8 @@ def power_estimation_correlation(npp = 30, ntrials = 480, nreversals = 12, cut_o
     Power is calculated using a simulation-based approach.
     """
     start_design = create_design(ntrials = ntrials, nreversals = nreversals, reward_probability = reward_probability)
-    if high_performance == True: n_cpu = cpu_count() - 2
+    if HPC == True: n_cpu = cpu_count()
+    elif high_performance == True: n_cpu = cpu_count() - 2
     else: n_cpu = 1
     pool = Pool(processes = n_cpu)
     LR_distribution = np.array([mean_LRdistribution, SD_LRdistribution])
@@ -117,9 +122,10 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
     else: n_cpu = 1
     if __name__ == '__main__': 
         # First: check what the power is when true parameters would be recoverable 
-        power = tt_ind_solve_power(nobs1 = npp_per_group, ratio = 1, effect_size = cohens_d, alpha = typeIerror, power = None, 
-                                alternative = 'larger')
-        print("\nPower if estimates would be perfect: {}%".format(np.round(power, 4)*100))    
+        if HPC == False: 
+            power = tt_ind_solve_power(nobs1 = npp_per_group, ratio = 1, effect_size = cohens_d, alpha = typeIerror, power = None, 
+                                    alternative = 'larger')
+            print("\nPower if estimates would be perfect: {}%".format(np.round(power, 4)*100))    
         
         
         
@@ -156,7 +162,7 @@ if __name__ == '__main__':
     assert len(criterion) == 1
     criterion = criterion[0]
     
-    InputFile_name = "InputFile_{}_Goris.csv".format(criterion)
+    InputFile_name = "InputFile_{}.csv".format(criterion)
     InputFile_path = os.path.join(os.getcwd(), InputFile_name)
     InputParameters = pd.read_csv(InputFile_path, delimiter = ';')
     InputDictionary = InputParameters.to_dict()
@@ -193,11 +199,12 @@ if __name__ == '__main__':
                                                reward_probability = reward_probability, mean_LRdistribution = meanLR, 
                                                SD_LRdistribution = sdLR, mean_inverseTempdistribution = meanInverseT, 
                                                SD_inverseTempdistribution = sdInverseT)
-            fig, axes = plt.subplots(nrows = 1, ncols = 1)
-            sns.kdeplot(output["correlations"], label = "correlations", ax = axes)
-            fig.suptitle("P(correlation >= {} with {} pp, {} trials)".format(tau, npp, ntrials), fontweight = 'bold')
-            axes.set_title("Power = {}% based on {} reps".format(np.round(power_estimate*100, 2), nreps))
-            axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
+            if HPC == False: 
+                fig, axes = plt.subplots(nrows = 1, ncols = 1)
+                sns.kdeplot(output["correlations"], label = "correlations", ax = axes)
+                fig.suptitle("P(correlation >= {} with {} pp, {} trials)".format(tau, npp, ntrials), fontweight = 'bold')
+                axes.set_title("Power = {}% based on {} reps".format(np.round(power_estimate*100, 2), nreps))
+                axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
             
         elif criterion == "GD": 
             npp_pergroup = InputDictionary['npp_group'][row]
@@ -206,7 +213,8 @@ if __name__ == '__main__':
             meanInverseT_g1, sdInverseT_g1 = InputDictionary['meanInverseTemperature_g1'][row], InputDictionary['sdInverseTemperature_g1'][row]
             meanInverseT_g2, sdInverseT_g2 = InputDictionary['meanInverseTemperature_g2'][row], InputDictionary['sdInverseTemperature_g2'][row]
             typeIerror = InputDictionary['TypeIerror'][row]
-            
+            # Calculate tau based on the typeIerror and the df
+            tau = stat.t.ppf(1-typeIerror, npp_pergroup*2-1)
             cohens_d = np.abs(meanLR_g1-meanLR_g2)/np.sqrt((sdLR_g1**2+sdLR_g2**2)/2)
             
             
@@ -217,13 +225,12 @@ if __name__ == '__main__':
                                                mean_LRdistributionG2 = meanLR_g2, SD_LRdistributionG2=sdLR_g2, 
                                                mean_inverseTempdistributionG1 = meanInverseT_g1, SD_inverseTempdistributionG1 = sdInverseT_g1, 
                                                mean_inverseTempdistributionG2 = meanInverseT_g2, SD_inverseTempdistributionG2 = sdInverseT_g2)
-            fig, axes = plt.subplots(nrows = 1, ncols = 1)
-            sns.kdeplot(output["Statistic"], label = "T", ax = axes)
-            fig.suptitle("P(p-value <= {}) with {} pp, {} trials".format(typeIerror, npp_pergroup, ntrials), fontweight = 'bold')
-            axes.set_title("Power = {}% based on {} reps with ES = {}".format(np.round(power_estimate*100, 2), nreps, cohens_d))
-            # Calculate tau based on the typeIerror and the df
-            tau = stat.t.ppf(1-typeIerror, npp_pergroup*2-1)
-            axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
+            if HPC == False: 
+                fig, axes = plt.subplots(nrows = 1, ncols = 1)
+                sns.kdeplot(output["Statistic"], label = "T", ax = axes)
+                fig.suptitle("P(p-value <= {}) with {} pp, {} trials".format(typeIerror, npp_pergroup, ntrials), fontweight = 'bold')
+                axes.set_title("Power = {}% based on {} reps with ES = {}".format(np.round(power_estimate*100, 2), nreps, cohens_d))
+                axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
             
             
             
@@ -231,9 +238,10 @@ if __name__ == '__main__':
         
         else: print("Criterion not found")
         #final adaptations to the output figure & store the figure 
-        fig.legend(loc = 'center right')
-        fig.tight_layout()
-        fig.savefig(os.path.join(output_folder, 'Distributionplot_{}_line{}.jpg'.format(criterion, row)))
+        if HPC == False: 
+            fig.legend(loc = 'center right')
+            fig.tight_layout()
+            fig.savefig(os.path.join(output_folder, 'Distributionplot_{}_line{}.jpg'.format(criterion, row)))
         
         # measure how long the power estimation lasted 
         end_time = datetime.now()

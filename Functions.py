@@ -594,8 +594,9 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
                 LRestimations[group, pp] = estimated_LR
                 InvTestimations[group, pp] = estimated_invT
             
-            
-    Statistic, pValue = stat.ttest_ind(LRestimations[0, :], LRestimations[1, :], alternative = 'less')
+    # use two-sided then divide by to, this way we can use the same formula for HPC and non HPC 
+    Statistic, pValue = stat.ttest_ind(LRestimations[0, :], LRestimations[1, :]) # default: alternative = two-sided
+    pValue = pValue/2 # because alternative = less does not exist in scipy version 1.4.0, yet we want a one-sided test
     if rep == 0: 
         t1 = time.time() - t0
         estimated_seconds = t1 * nreps / ncpu
