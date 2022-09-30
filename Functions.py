@@ -272,7 +272,14 @@ def likelihood(parameter_set, data):
             # which can be simplified to: value_responseX*inverse_temperature - log(exp(value_response0*inverse_temperature) + exp(value_response1*inverse_temperature)) with X = current response 
             # used mathematical rule: log( exp(x) / (exp(x)+exp(y)) ) = x - log(exp(x)+exp(y))
         #probabilities = np.exp(loglikelihoods) --> this has to be equal to 1 
-        loglikelihoods = stimulus_weights*retransformed_invT - np.log(np.sum((np.exp(stimulus_weights[0]*retransformed_invT)+np.exp(stimulus_weights[1]*retransformed_invT))))
+        
+        # this to ensure no overflows are encountered in the estimation process 
+        if np.abs(retransformed_invT) > 99: 
+            # loglikelihoods = np.array([-999, -999])
+            summed_logL = -9999
+            break 
+        else: loglikelihoods = stimulus_weights*retransformed_invT - np.log(np.sum((np.exp(stimulus_weights[0]*retransformed_invT)+np.exp(stimulus_weights[1]*retransformed_invT))))
+            
         #then select the probability of the actual response given the parameter set
         current_loglikelihood = loglikelihoods[response]
         
@@ -440,9 +447,6 @@ def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntria
     True_LRs =  generate_parameters(mean = LR_distribution[0], std = LR_distribution[1], npp = npp)
     True_inverseTemps = generate_parameters(mean = inverseTemp_distribution[0], std = inverseTemp_distribution[1], npp = npp)
     
-    # print("Mean LR: {}, SD LR: {}; min LR: {}, max LR: {}".format(np.round(np.mean(True_LRs), 3), np.round(np.std(True_LRs), 3), 
-    #                                                               np.round(np.min(True_LRs), 3), np.round(np.max(True_LRs), 3)))
-    
     
     # loop over all pp. to do the data generation and parameter estimation 
     # create array that will contain the final LRestimate for each participant this repetition
@@ -461,7 +465,9 @@ def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntria
         start_params = np.random.uniform(-4.5, 4.5), np.random.uniform(-4.6, 2)
         optimization_output = optimize.minimize(likelihood, start_params, args =(tuple([start_design])), 
                                         method = 'Nelder-Mead',
-                                        options = {'maxfev':1000, 'xatol':0.001, 'return_all':1})
+                                        options = {'maxfev':1000, 'xatol':0.01, 'return_all':1})
+        if optimization_output.success == False: 
+            print("optimization failed")
         estimated_parameters = optimization_output['x']
         estimated_LR = LR_retransformation(estimated_parameters[0])
         estimated_invT = InverseT_retransformation(estimated_parameters[1])
@@ -586,7 +592,7 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
                 start_params = np.random.uniform(-4.5, 4.5), np.random.uniform(-4.6, 2)
                 optimization_output = optimize.minimize(likelihood, start_params, args =(tuple([start_design])), 
                                                 method = 'Nelder-Mead',
-                                                options = {'maxfev':1000, 'xatol':0.001, 'return_all':1})
+                                                options = {'maxfev':1000, 'xatol':0.01, 'return_all':1})
                 estimated_parameters = optimization_output['x']
                 estimated_LR = LR_retransformation(estimated_parameters[0])
                 estimated_invT = InverseT_retransformation(estimated_parameters[1])
