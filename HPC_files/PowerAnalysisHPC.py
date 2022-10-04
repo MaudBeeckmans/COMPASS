@@ -4,7 +4,7 @@ Created on Tue Dec 14 11:04:23 2021
 
 @author: maudb
 """
-HPC = False
+HPC = True
 
 import numpy as np
 import pandas as pd 
@@ -72,7 +72,8 @@ def power_estimation_correlation(npp = 30, ntrials = 480, nreversals = 12, cut_o
     Statistics = np.empty(nreps)
     rep = 0
     process_repeat = 0
-    q = Queue()
+    # q = Queue()
+    q = 0
     while rep < nreps: 
         worker_pool = []
     
@@ -92,8 +93,8 @@ def power_estimation_correlation(npp = 30, ntrials = 480, nreversals = 12, cut_o
         print("{} repetitions completed".format(rep))
     
     print('exited the loop')
-    for i in range(nreps): 
-        Statistics[i] = q.get()
+    # for i in range(nreps): 
+    #     Statistics[i] = q.get()
     
     # allreps_output = pd.DataFrame(out, columns = ['correlations'])
     
