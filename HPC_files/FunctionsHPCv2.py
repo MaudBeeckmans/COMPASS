@@ -298,7 +298,7 @@ def likelihood(parameter_set, data):
 
 #%% Functions used in the PowerAnalysis script
 
-def create_design(ntrials = 480, nreversals = 1, reward_probability = 0.8):
+def create_design(ntrials = 480, nreversals = 1, reward_probability = 0.8, irep = 0, data_dir = os.getcwd()):
     """
     Parameters
     ----------
@@ -376,10 +376,13 @@ def create_design(ntrials = 480, nreversals = 1, reward_probability = 0.8):
     np.random.shuffle(FBcon_array)
     design[:, 4] = FBcon_array
     
+    #store design
+    filename = os.path.join(data_dir, 'Design_rep{}.npy'.format(irep))
+    np.save(filename, design)    
 # Convert the design dataframe to a design array, since arrays are computationally less demanding
     return design
 
-def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntrials, start_design, data_dir):
+def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntrials, start_design, data_dir, irep):
     
     """
 
@@ -477,13 +480,18 @@ def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntria
     # else: 
     #     Statistic = np.round(np.corrcoef(np.delete(True_LRs, failed_estimates), 
     #                                    np.delete(LRestimations, failed_estimates))[0, 1], 2)
-    # Store statistic in file 
-    # np.save(os.path.join(data_dir, 'Statistic_rep{}.npy'.format(rep)), Statistic)
     
-    return Statistic
+    #store the LR & inverse temperatures for all participants
+    parameter_file = os.path.join(data_dir, 'Parameters_rep{}.npy'.format(irep))
+    parameters = np.column_stack([True_LRs, LRestimations, True_inverseTemps, invTestimations])
+    np.save(parameter_file, parameters)
+    
+    # Store statistic in file 
+    statistic_file = os.path.join(data_dir, 'Statistic_rep{}.npy'.format(irep))
+    np.save(statistic_file, Statistic)
 
 def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_per_group, 
-                               ntrials, start_design, data_dir): 
+                               ntrials, start_design, data_dir, irep): 
     """
 
     Parameters
@@ -581,11 +589,19 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
             
             LRestimations[group, pp] = estimated_LR
             InvTestimations[group, pp] = estimated_invT
-        
+    
+    
     # use two-sided then divide by to, this way we can use the same formula for HPC and non HPC 
     Statistic, pValue = stat.ttest_ind(LRestimations[0, :], LRestimations[1, :]) # default: alternative = two-sided
     
-    return Statistic
+    #store the LR & inverse temperatures for all participants
+    parameter_file = os.path.join(data_dir, 'Parameters_rep{}.npy'.format(irep))
+    parameters = np.column_stack([True_LRs, True_inverseTemps, LRestimations, InvTestimations])
+    np.save(parameter_file, parameters)
+    
+    # Store statistic in file 
+    statistic_file = os.path.join(data_dir, 'Statistic_rep{}.npy'.format(irep))
+    np.save(statistic_file, Statistic)
 
 #%%
 def check_input_parameters(ntrials, nreversals, npp, reward_probability, full_speed, criterion, significance_cutoff, cohens_d, nreps, plot_folder):

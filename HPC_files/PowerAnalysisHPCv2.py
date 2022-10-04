@@ -21,7 +21,8 @@ import os
 
 def power_estimation_correlation(npp = 30, ntrials = 480, nreversals = 12, cut_off = 0.7, high_performance = False, 
                                  nreps = 100, reward_probability = 0.8, mean_LRdistribution = 0.5, SD_LRdistribution = 0.1, 
-                                 mean_inverseTempdistribution = 2.0, SD_inverseTempdistribution = 1.0, data_dir = os.getcwd()): 
+                                 mean_inverseTempdistribution = 2.0, SD_inverseTempdistribution = 1.0, 
+                                 data_dir = os.getcwd(), irep = 0): 
     """
 
     Parameters
@@ -60,16 +61,16 @@ def power_estimation_correlation(npp = 30, ntrials = 480, nreversals = 12, cut_o
     LR_distribution = np.array([mean_LRdistribution, SD_LRdistribution])
     inverseTemp_distribution = np.array([mean_inverseTempdistribution, SD_inverseTempdistribution])
     
-    Statistic = correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntrials, 
-                                                 start_design, data_dir)
-    return Statistic
+    correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntrials, 
+                                                 start_design, data_dir, irep)
 
 def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 100, typeIerror = 0.05, 
                                      high_performance = False, nreversals = 12, reward_probability = 0.8, 
                                      mean_LRdistributionG1 = 0.5, SD_LRdistributionG1 = 0.1, 
                                      mean_LRdistributionG2 = 0.5, SD_LRdistributionG2 = 0.1, 
                                      mean_inverseTempdistributionG1 = 2.0, SD_inverseTempdistributionG1 = 1.0, 
-                                     mean_inverseTempdistributionG2 = 2.0, SD_inverseTempdistributionG2 = 1.0): 
+                                     mean_inverseTempdistributionG2 = 2.0, SD_inverseTempdistributionG2 = 1.0, 
+                                     data_dir = os.getcwd(), irep = 0): 
     """
     Parameters
     ----------
@@ -102,16 +103,14 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
     Power is calculated using a simulation-based approach.
     """
     
-    start_design = create_design(ntrials = ntrials, nreversals = nreversals, reward_probability = reward_probability)
+    start_design = create_design(ntrials = ntrials, nreversals = nreversals, reward_probability = reward_probability, irep = irep, data_dir = data_dir)
     
     LR_distributions = np.array([[mean_LRdistributionG1, SD_LRdistributionG1], [mean_LRdistributionG2, SD_LRdistributionG2]])
     inverseTemp_distributions = np.array([[mean_inverseTempdistributionG1, SD_inverseTempdistributionG1], 
                                           [mean_inverseTempdistributionG2, SD_inverseTempdistributionG2]])
     
-    Statistic = groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_per_group, 
-                                                 ntrials, start_design, data_dir)
-    
-    return Statistic
+    groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_per_group, 
+                                                 ntrials, start_design, data_dir, irep)
 
 #%%
 
@@ -145,8 +144,8 @@ for row in range(InputParameters.shape[0]):
     full_speed = InputDictionary['full_speed'][row]
     output_folder = InputDictionary['output_folder'][row]
     
-    data_dir = os.path.join(output_folder, 'Output')
-    if not os.path.isdir(data_dir): os.makedirs(data_dir)
+    
+    output_dir = os.path.join(output_folder, 'Output')
     
     if criterion == "IC":
         npp = InputDictionary['npp'][row]
@@ -155,15 +154,17 @@ for row in range(InputParameters.shape[0]):
         tau = InputDictionary['tau'][row]
         s_pooled = sdLR
         
+        Results_folder = os.path.join(output_dir, "Results{}{}SD{}T{}R{}N".format(criterion, s_pooled, 
+                                                                                           ntrials, nreversals, npp))
+        
         Statistic = power_estimation_correlation(npp = npp, ntrials = ntrials, nreps = nreps, 
                                                               cut_off = tau, 
                                            high_performance = full_speed, nreversals = nreversals, 
                                            reward_probability = reward_probability, mean_LRdistribution = meanLR, 
                                            SD_LRdistribution = sdLR, mean_inverseTempdistribution = meanInverseT, 
-                                           SD_inverseTempdistribution = sdInverseT, data_dir = data_dir)
+                                           SD_inverseTempdistribution = sdInverseT, data_dir = Results_folder, irep = irep)
         
-        Results_folder = os.path.join(data_dir, "Results{}{}SD{}T{}R{}N".format(criterion, s_pooled, 
-                                                                                           ntrials, nreversals, npp))
+        
 
         
         
@@ -181,23 +182,24 @@ for row in range(InputParameters.shape[0]):
         cohens_d = np.abs(meanLR_g1-meanLR_g2)/s_pooled
         
         
+        Results_folder = os.path.join(output_dir, "Results{}{}SD{}ES{}T{}R{}N".format(criterion, 
+                                                                                         np.round(s_pooled, 2), 
+                                                                                         np.round(cohens_d, 2), 
+                                                                                           ntrials, nreversals, npp))
+
         Statistic = power_estimation_groupdifference(npp_per_group = npp_pergroup, ntrials = ntrials, 
                                            nreps = nreps, typeIerror = typeIerror, high_performance = full_speed, 
                                            nreversals = nreversals, reward_probability = reward_probability, 
                                            mean_LRdistributionG1 = meanLR_g1, SD_LRdistributionG1 = sdLR_g1, 
                                            mean_LRdistributionG2 = meanLR_g2, SD_LRdistributionG2=sdLR_g2, 
                                            mean_inverseTempdistributionG1 = meanInverseT_g1, SD_inverseTempdistributionG1 = sdInverseT_g1, 
-                                           mean_inverseTempdistributionG2 = meanInverseT_g2, SD_inverseTempdistributionG2 = sdInverseT_g2)
+                                           mean_inverseTempdistributionG2 = meanInverseT_g2, SD_inverseTempdistributionG2 = sdInverseT_g2, 
+                                           data_dir = Results_folder, irep = irep)
         
-        Results_folder = os.path.join(data_dir, "Results{}{}SD{}ES{}T{}R{}N".format(criterion, 
-                                                                                         np.round(s_pooled, 2), 
-                                                                                         np.round(cohens_d, 2), 
-                                                                                           ntrials, nreversals, npp))
+        
         
     else: print("Criterion not found")
     
-    if not os.path.isdir(Results_folder): os.makedirs(Results_folder)
-    print(Results_folder)
     filename = os.path.join(Results_folder, "Statistic{}irep.npy".format(irep))
     np.save(filename, Statistic)
     
