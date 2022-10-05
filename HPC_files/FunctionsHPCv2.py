@@ -559,13 +559,18 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
     """
     
     # create array that will contain the final LRestimate for each participant this repetition
-    LRestimations = np.empty([2, npp_per_group]) 
-    InvTestimations = np.empty([2, npp_per_group])
+    Stored_trueLRs = np.empty([npp_per_group, 2])  
+    Stored_trueInvTs = np.empty([npp_per_group, 2])  
+    LRestimations = np.empty([npp_per_group, 2]) 
+    InvTestimations = np.empty([npp_per_group, 2])
     for group in range(2):
         ####PART 1: parameter generation for all participants####
         # Define the True params that will be used for each pp in this rep
         True_LRs =  generate_parameters(mean = LR_distributions[group, 0], std = LR_distributions[group, 1], npp = npp_per_group)
         True_inverseTemps = generate_parameters(mean = inverseTemp_distributions[group, 0], std = inverseTemp_distributions[group, 1], npp = npp_per_group)
+        
+        Stored_trueLRs[:, group] = True_LRs
+        Stored_trueInvTs[:, group] = True_inverseTemps
         
         # loop over all pp. to do the data generation and parameter estimation 
         for pp in range(npp_per_group): 
@@ -587,16 +592,16 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
             estimated_LR = LR_retransformation(estimated_parameters[0])
             estimated_invT = InverseT_retransformation(estimated_parameters[1])
             
-            LRestimations[group, pp] = estimated_LR
-            InvTestimations[group, pp] = estimated_invT
+            LRestimations[pp, group] = estimated_LR
+            InvTestimations[pp, group] = estimated_invT
     
     
     # use two-sided then divide by to, this way we can use the same formula for HPC and non HPC 
-    Statistic, pValue = stat.ttest_ind(LRestimations[0, :], LRestimations[1, :]) # default: alternative = two-sided
+    Statistic, pValue = stat.ttest_ind(LRestimations[:, 0], LRestimations[:, 1]) # default: alternative = two-sided
     
     #store the LR & inverse temperatures for all participants
     parameter_file = os.path.join(data_dir, 'Parameters_rep{}.npy'.format(irep))
-    parameters = np.column_stack([True_LRs, True_inverseTemps, LRestimations, InvTestimations])
+    parameters = np.column_stack([Stored_trueLRs, LRestimations, Stored_trueInvTs, InvTestimations])
     np.save(parameter_file, parameters)
     
     # Store statistic in file 

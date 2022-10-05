@@ -156,8 +156,9 @@ for row in range(InputParameters.shape[0]):
         
         Results_folder = os.path.join(output_dir, "Results{}{}SD{}T{}R{}N".format(criterion, s_pooled, 
                                                                                            ntrials, nreversals, npp))
+        if not os.path.isdir(Results_folder): os.makedirs(Results_folder)
         
-        Statistic = power_estimation_correlation(npp = npp, ntrials = ntrials, nreps = nreps, 
+        power_estimation_correlation(npp = npp, ntrials = ntrials, nreps = nreps, 
                                                               cut_off = tau, 
                                            high_performance = full_speed, nreversals = nreversals, 
                                            reward_probability = reward_probability, mean_LRdistribution = meanLR, 
@@ -186,8 +187,9 @@ for row in range(InputParameters.shape[0]):
                                                                                          np.round(s_pooled, 2), 
                                                                                          np.round(cohens_d, 2), 
                                                                                            ntrials, nreversals, npp))
-
-        Statistic = power_estimation_groupdifference(npp_per_group = npp_pergroup, ntrials = ntrials, 
+        if not os.path.isdir(Results_folder): os.makedirs(Results_folder)
+        
+        power_estimation_groupdifference(npp_per_group = npp_pergroup, ntrials = ntrials, 
                                            nreps = nreps, typeIerror = typeIerror, high_performance = full_speed, 
                                            nreversals = nreversals, reward_probability = reward_probability, 
                                            mean_LRdistributionG1 = meanLR_g1, SD_LRdistributionG1 = sdLR_g1, 
@@ -200,15 +202,13 @@ for row in range(InputParameters.shape[0]):
         
     else: print("Criterion not found")
     
-    filename = os.path.join(Results_folder, "Statistic{}irep.npy".format(irep))
-    np.save(filename, Statistic)
-    
     rep_endtime = datetime.now()
     rep_duration = rep_endtime - rep_starttime
     print("Repetition with {} trials, {} pp lasted {}".format(ntrials, npp, rep_duration))
     durations = np.append(durations, rep_duration)
-    np.save("Durations.npy", durations)
-    
+
+duration_file = os.path.join(output_dir, "Durations{}_rep{}.npy".format(criterion, irep))
+np.save(duration_file, durations)
 # measure how long the power estimation lasted 
 end_time = datetime.now()
 print("\nPower analysis ended at {}; run lasted {} hours.".format(end_time, end_time-start_time))
