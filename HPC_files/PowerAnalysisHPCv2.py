@@ -131,7 +131,7 @@ InputParameters = pd.read_csv(InputFile_path, delimiter = ';')
 InputDictionary = InputParameters.to_dict()
 print(InputDictionary)
     
-durations = np.array([])
+# durations = np.array([])
 for row in range(InputParameters.shape[0]): 
     #Calculate how long it takes to do a power estimation 
     rep_starttime = datetime.now()
@@ -156,7 +156,7 @@ for row in range(InputParameters.shape[0]):
         
         Results_folder = os.path.join(output_dir, "Results{}{}SD{}T{}R{}N".format(criterion, s_pooled, 
                                                                                            ntrials, nreversals, npp))
-        if not os.path.isdir(Results_folder): os.makedirs(Results_folder)
+        # if not os.path.isdir(Results_folder): os.makedirs(Results_folder)
         
         power_estimation_correlation(npp = npp, ntrials = ntrials, nreps = nreps, 
                                                               cut_off = tau, 
@@ -205,10 +205,10 @@ for row in range(InputParameters.shape[0]):
     rep_endtime = datetime.now()
     rep_duration = rep_endtime - rep_starttime
     print("Repetition with {} trials, {} pp lasted {}".format(ntrials, npp, rep_duration))
-    durations = np.append(durations, rep_duration)
+    # durations = np.append(durations, rep_duration)
 
-duration_file = os.path.join(output_dir, "Durations{}_rep{}.npy".format(criterion, irep))
-np.save(duration_file, durations)
+# duration_file = os.path.join(output_dir, "Durations{}_rep{}.npy".format(criterion, irep))
+# np.save(duration_file, durations)
 # measure how long the power estimation lasted 
 end_time = datetime.now()
 print("\nPower analysis ended at {}; run lasted {} hours.".format(end_time, end_time-start_time))
