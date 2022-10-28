@@ -38,16 +38,17 @@ def combine_output(criterion = 'IC', variable = 'Statistic', ntrials = np.array(
     
 
 input_parameters = sys.argv[1:]
-assert len(input_parameters) == 3
+assert len(input_parameters) == 4
 criterion = input_parameters[0]
 SD = input_parameters[1]
 ES = input_parameters[2]
+nreps = int(input_parameters[3])
 
 
 combine_output(criterion = criterion, variable = 'Statistic', ntrials = np.arange(80, 1000, 160), 
-               ireversal = 40, npp = np.arange(30, 100, 20), sd = SD, 
-               main_folder = r'/user/data/gent/442/vsc44254/COMPASS/Version2022_2023', 
-               nreps = 100)
+               ireversal = 40, npp = np.arange(40, 201, 20), sd = SD, ES = ES,
+               main_folder = r'/data/gent/442/vsc44254/COMPASS/Version2022_2023', 
+               nreps = nreps)
         
         
         
