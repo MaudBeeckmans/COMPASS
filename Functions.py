@@ -474,11 +474,6 @@ def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntria
         
         LRestimations[pp] = estimated_LR
         invTestimations[pp] = estimated_invT
-    ## Checking some stuff
-    # print("\n")
-    # print(np.round(LRestimations, 3))
-    # print(np.round(invTestimations, 3))
-    
     
     ####Part 4: correlation between true & estimated learning rates####
     # if the estimation failed for a certain participant, delete this participant from the correlation estimation for this repetition
@@ -593,6 +588,8 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
                 optimization_output = optimize.minimize(likelihood, start_params, args =(tuple([start_design])), 
                                                 method = 'Nelder-Mead',
                                                 options = {'maxfev':1000, 'xatol':0.01, 'return_all':1})
+                if optimization_output.success == False: 
+                    print("optimization failed")
                 estimated_parameters = optimization_output['x']
                 estimated_LR = LR_retransformation(estimated_parameters[0])
                 estimated_invT = InverseT_retransformation(estimated_parameters[1])
