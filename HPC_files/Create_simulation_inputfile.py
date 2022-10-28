@@ -9,9 +9,9 @@ import pandas as pd
 import os, itertools
 import numpy as np
 
-def Create_InputFileIC(ntrials, ireversal, npp, meanLR, sdLR, meanInvT, sdInvT, Prew, tau, output_folder): 
+def Create_InputFileIC(ntrials, ireversal, npp, meanLR, sdLR, meanInvT, sdInvT, Prew, tau, output_folder, inputfile_folder): 
     
-    path = os.getcwd()
+    path = inputfile_folder
     file = os.path.join(path, "InputFile_IC.csv")
     columns = pd.read_csv(file, sep = ';').columns
     df = pd.DataFrame(columns = columns)
@@ -28,11 +28,14 @@ def Create_InputFileIC(ntrials, ireversal, npp, meanLR, sdLR, meanInvT, sdInvT, 
     df['reward_probability'] = Prew
     df['tau']= tau
     df['output_folder'] = output_folder
-    if not os.path.isfile("InputFile_IC_simulations.csv"): df.to_csv("InputFile_IC_simulations.csv", index = False, sep = ';')
+    
+    
+    inputfile_simulations = os.path.join(inputfile_folder, "InputFile_IC_simulations.csv")
+    if not os.path.isfile(inputfile_simulations): df.to_csv(inputfile_simulations, index = False, sep = ';')
     else: print("Warning: filename already exists")
 
-def Create_InputFileGD(ntrials, ireversal, npp, meanLRs, sdLRs, meanInvTs, sdInvTs, Prew, typeIerror, output_folder): 
-    path = os.getcwd()
+def Create_InputFileGD(ntrials, ireversal, npp, meanLRs, sdLRs, meanInvTs, sdInvTs, Prew, typeIerror, output_folder, inputfile_folder): 
+    path = inputfile_folder
     file = os.path.join(path, "InputFile_GD.csv")
     columns = pd.read_csv(file, sep = ';').columns
     df = pd.DataFrame(columns = columns)
@@ -49,18 +52,20 @@ def Create_InputFileGD(ntrials, ireversal, npp, meanLRs, sdLRs, meanInvTs, sdInv
     df['reward_probability'] = Prew
     df['TypeIerror']= typeIerror
     df['output_folder'] = output_folder
-    if not os.path.isfile("InputFile_GD_simulations.csv"): df.to_csv("InputFile_GD_simulations.csv", index = False, sep = ';')
+    
+    inputfile_simulations = os.path.join(inputfile_folder, "InputFile_GD_simulations.csv")
+    if not os.path.isfile(inputfile_simulations): df.to_csv(inputfile_simulations, index = False, sep = ';')
     else: print("Warning: filename already exists")
     
 
-df = Create_InputFileIC(ntrials = np.arange(80, 1000, 160), ireversal = 40, npp = np.arange(30, 100, 20), 
+df = Create_InputFileIC(ntrials = np.arange(80, 1000, 160), ireversal = 40, npp = np.arange(40, 201, 20), 
                    meanLR = 0.7, sdLR = 0.1, meanInvT = 1.5, sdInvT = 0.5, Prew = 0.8, tau = 0.75, 
-                   output_folder = r'/user/data/gent/442/vsc44254/COMPASS/Version2022_2023')    
+                   output_folder = r'/data/gent/442/vsc44254/COMPASS/Version2022_2023', inputfile_folder = r'C:\Users\maudb\Documents\GitHub\COMPASS')    
 
-df = Create_InputFileGD(ntrials = np.arange(80, 1000, 160), ireversal = 40, npp = np.arange(30, 100, 20), 
-                   meanLRs = [0.66, 0.74], sdLRs = [0.1, 0.1], meanInvTs = [1.5, 1.5], sdInvTs = [0.5, 0.5], Prew = 0.8, 
+df = Create_InputFileGD(ntrials = np.arange(80, 1000, 160), ireversal = 40, npp = np.arange(40, 201, 20), 
+                   meanLRs = [0.675, 0.725], sdLRs = [0.1, 0.1], meanInvTs = [1.5, 1.5], sdInvTs = [0.5, 0.5], Prew = 0.8, 
                    typeIerror = 0.05, 
-                   output_folder = r'/user/data/gent/442/vsc44254/COMPASS/Version2022_2023')    
+                   output_folder = r'/data/gent/442/vsc44254/COMPASS/Version2022_2023', inputfile_folder = r'C:\Users\maudb\Documents\GitHub\COMPASS')    
 
 
     
