@@ -377,8 +377,8 @@ def create_design(ntrials = 480, nreversals = 1, reward_probability = 0.8, irep 
     design[:, 4] = FBcon_array
     
     #store design
-    filename = os.path.join(data_dir, 'Design_rep{}.npy'.format(irep))
-    np.save(filename, design)    
+    # filename = os.path.join(data_dir, 'Design_rep{}.npy'.format(irep))
+    # np.save(filename, design)    
 # Convert the design dataframe to a design array, since arrays are computationally less demanding
     return design
 
@@ -482,9 +482,9 @@ def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntria
     #                                    np.delete(LRestimations, failed_estimates))[0, 1], 2)
     
     #store the LR & inverse temperatures for all participants
-    parameter_file = os.path.join(data_dir, 'Parameters_rep{}.npy'.format(irep))
-    parameters = np.column_stack([True_LRs, LRestimations, True_inverseTemps, invTestimations])
-    np.save(parameter_file, parameters)
+    # parameter_file = os.path.join(data_dir, 'Parameters_rep{}.npy'.format(irep))
+    # parameters = np.column_stack([True_LRs, LRestimations, True_inverseTemps, invTestimations])
+    # np.save(parameter_file, parameters)
     
     # Store statistic in file 
     statistic_file = os.path.join(data_dir, 'Statistic_rep{}.npy'.format(irep))
@@ -600,9 +600,9 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
     Statistic, pValue = stat.ttest_ind(LRestimations[:, 0], LRestimations[:, 1]) # default: alternative = two-sided
     
     #store the LR & inverse temperatures for all participants
-    parameter_file = os.path.join(data_dir, 'Parameters_rep{}.npy'.format(irep))
-    parameters = np.column_stack([Stored_trueLRs, LRestimations, Stored_trueInvTs, InvTestimations])
-    np.save(parameter_file, parameters)
+    # parameter_file = os.path.join(data_dir, 'Parameters_rep{}.npy'.format(irep))
+    # parameters = np.column_stack([Stored_trueLRs, LRestimations, Stored_trueInvTs, InvTestimations])
+    # np.save(parameter_file, parameters)
     
     # Store statistic in file 
     statistic_file = os.path.join(data_dir, 'Statistic_rep{}.npy'.format(irep))
