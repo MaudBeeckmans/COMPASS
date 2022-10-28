@@ -59,6 +59,7 @@ def power_estimation_correlation(npp = 30, ntrials = 480, nreversals = 12, cut_o
     if HPC == True: n_cpu = cpu_count()
     elif high_performance == True: n_cpu = cpu_count() - 2
     else: n_cpu = 1
+
     pool = Pool(processes = n_cpu)
     LR_distribution = np.array([mean_LRdistribution, SD_LRdistribution])
     inverseTemp_distribution = np.array([mean_inverseTempdistribution, SD_inverseTempdistribution])
@@ -192,6 +193,7 @@ if __name__ == '__main__':
             meanLR, sdLR = InputDictionary['meanLR'][row], InputDictionary['sdLR'][row]
             meanInverseT, sdInverseT = InputDictionary['meanInverseTemperature'][row], InputDictionary['sdInverseTemperature'][row]
             tau = InputDictionary['tau'][row]
+            s_pooled = sdLR
             
             output, power_estimate = power_estimation_correlation(npp = npp, ntrials = ntrials, nreps = nreps, 
                                                                   cut_off = tau, 
@@ -199,6 +201,9 @@ if __name__ == '__main__':
                                                reward_probability = reward_probability, mean_LRdistribution = meanLR, 
                                                SD_LRdistribution = sdLR, mean_inverseTempdistribution = meanInverseT, 
                                                SD_inverseTempdistribution = sdInverseT)
+            output.to_csv(os.path.join(output_folder, 'OutputIC{}SD{}T{}R{}N{}M.csv'.format(s_pooled, ntrials,
+                                                                                      nreversals, 
+                                                                                      npp, nreps)))
             if HPC == False: 
                 fig, axes = plt.subplots(nrows = 1, ncols = 1)
                 sns.kdeplot(output["correlations"], label = "correlations", ax = axes)
@@ -208,6 +213,7 @@ if __name__ == '__main__':
             
         elif criterion == "GD": 
             npp_pergroup = InputDictionary['npp_group'][row]
+            npp = npp_pergroup*2
             meanLR_g1, sdLR_g1 = InputDictionary['meanLR_g1'][row], InputDictionary['sdLR_g1'][row]
             meanLR_g2, sdLR_g2 = InputDictionary['meanLR_g2'][row], InputDictionary['sdLR_g2'][row]
             meanInverseT_g1, sdInverseT_g1 = InputDictionary['meanInverseTemperature_g1'][row], InputDictionary['sdInverseTemperature_g1'][row]
@@ -215,8 +221,8 @@ if __name__ == '__main__':
             typeIerror = InputDictionary['TypeIerror'][row]
             # Calculate tau based on the typeIerror and the df
             tau = stat.t.ppf(1-typeIerror, npp_pergroup*2-1)
-            cohens_d = np.abs(meanLR_g1-meanLR_g2)/np.sqrt((sdLR_g1**2+sdLR_g2**2)/2)
-            
+            s_pooled = np.sqrt((sdLR_g1**2 + sdLR_g2**2) / 2)
+            cohens_d = np.abs(meanLR_g1-meanLR_g2)/s_pooled
             
             output, power_estimate = power_estimation_groupdifference(npp_per_group = npp_pergroup, ntrials = ntrials, 
                                                nreps = nreps, typeIerror = typeIerror, high_performance = full_speed, 
@@ -225,6 +231,10 @@ if __name__ == '__main__':
                                                mean_LRdistributionG2 = meanLR_g2, SD_LRdistributionG2=sdLR_g2, 
                                                mean_inverseTempdistributionG1 = meanInverseT_g1, SD_inverseTempdistributionG1 = sdInverseT_g1, 
                                                mean_inverseTempdistributionG2 = meanInverseT_g2, SD_inverseTempdistributionG2 = sdInverseT_g2)
+            output.to_csv(os.path.join(output_folder, 'OutputGD{}SD{}T{}R{}N{}M{}ES.csv'.format(np.round(s_pooled,2),
+                                                                                                ntrials,
+                                                                                      nreversals, 
+                                                                                      npp, nreps, cohens_d)))
             if HPC == False: 
                 fig, axes = plt.subplots(nrows = 1, ncols = 1)
                 sns.kdeplot(output["Statistic"], label = "T", ax = axes)
@@ -241,7 +251,10 @@ if __name__ == '__main__':
         if HPC == False: 
             fig.legend(loc = 'center right')
             fig.tight_layout()
-            fig.savefig(os.path.join(output_folder, 'Distributionplot_{}_line{}.jpg'.format(criterion, row)))
+            fig.savefig(os.path.join(output_folder, 'Plot{}{}T{}R{}N{}M.jpg'.format(criterion, 
+                                                                                    np.round(s_pooled, 2),
+                                                                                    ntrials, nreversals, 
+                                                                                    npp, nreps)))
         
         # measure how long the power estimation lasted 
         end_time = datetime.now()
