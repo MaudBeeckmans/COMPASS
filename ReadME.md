@@ -137,10 +137,8 @@ This allows the researcher to elegantly compare the effect of changing a certain
 
 4. Check the output in the shell & the stored figure(s) in the _output_folder_
    * _power estimate_: the probability to obtain adequate parameter estimates
-   * _mean failed 𝛼 estimates_: the mean % of participants whose learning rate estimate was implausible;
-     an 𝛼 estimate is considered implausible when ≼ 0.1
    * _probability density plot of the Statistic of interest_: a plot visualising the obtained values for the Statistic of interest in all power recovery analyses
-     - x-axis: values for the statistic of interest (correlation or p-value)
+     - x-axis: values for the statistic of interest (correlation or T-Statistic)
      - y-axis: probability density for each value
 
     Example output: 
@@ -159,4 +157,4 @@ This allows the researcher to elegantly compare the effect of changing a certain
 - Supervising professor: Tom Verguts
     * [E-mail me at Tom (dot) Verguts (at) UGent (dot) be](mailto:Tom.Verguts@UGent.be)
 
-**Last edit: 10 March 2022**
+**Last edit: 3 November 2023**
