@@ -79,6 +79,7 @@ Each parameter recovery analysis consists of the following four steps:
 2b) GD: Open the InputFile_GD.csv and adapt the variables to define your model, statistic parameters and typeIerror. 
 
 <img width="850" alt="image" src="https://github.com/MaudBeeckmans/COMPASS/blob/Version-0.2/Figures/ReadMe/InputGD_example.png">
+
 * _ntrials_: integer 𝜖 [5, +∞[
 	**number of trials within the experiment (minimal 5)**
 * _nreversals_: integer 𝜖 [0, ntrials[
