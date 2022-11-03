@@ -19,7 +19,7 @@ The model has two free parameters: the learning rate 𝛼 and the inverse temper
 
 ## Important limitation: the required computational time
 The computational time for these power estimates is quite large. This computational time depends on several factors: the number of trials, the number of participants and the number of repetitions included in the power estimate. Therefore, the option is included to run the power analysis on multiple cores. This happens when the user defines the 'full_speed' option as 1; if this option is activated, all minus two cores on the computer  doing the power analysis will be used.  
-When using the template for the Input_file.csv on GitHub, the power analysis takes ca. 10 minutes when running on a single core and ca. 2 minutes when running on a computer with 16 cores. It is important to realise that any increase in the number of trials, participants or repetitions used for the power analysis will increase the computation time. 
+When using the template for the InputFile_IC.csv and the InputFile_GD.csv on GitHub, the power analysis takes ca. 10 minutes when running on a single core and ca. 2 minutes when running on a computer with 16 cores. It is important to realise that any increase in the number of trials, participants or repetitions used for the power analysis will increase the computation time. 
 COMPASS gives an estimate of how long it will take to calculate the power for each line within this Input_file, at the beginning of the execution of each line. This estimate is based on the time it takes to execute a single repetition and calculated by multiplying the total number of repetitions included by the time required for a single repetition, divided by the number of cores that are used in the power analysis. If you want to stop the process whilst running, you can use 'ctrl + C' in the anaconda prompt shell. This will completely stop the execution of the script. 
 
 ## Power estimation with COMPASS
@@ -33,13 +33,48 @@ Each parameter recovery analysis consists of the following four steps:
   2. Simulate data for each participant (= each parameter set)
   3. Estimate the best fitting parameters for each participant given the simulated data. These are the ‘recovered parameters’. 
   4. Evaluate whether the parameter recovery analysis was successful. This depends on the parameter recovery criterion defined by the researcher. 	
-     - _correlation_: <img width="100" alt="image" src="https://user-images.githubusercontent.com/73498415/156185769-cad73153-2b53-4707-a266-67c376a00c79.png">
+     - _internal_correlation_: <img width="100" alt="image" src="https://user-images.githubusercontent.com/73498415/156185769-cad73153-2b53-4707-a266-67c376a00c79.png">
      - _group_difference_: <img width="50" alt="image" src="https://user-images.githubusercontent.com/73498415/156185831-2f654264-82a4-44e9-abd3-676033fb6cd9.png"> (success when p_value ≼ cut_off)
 ## How to use COMPASS
 1. Download all files from this github-folder and store them in the same folder on your computer.
 
-2. Open Input_file.csv and adapt the variables to match your design and your parameter recovery requirements. Be sure to adapt the output_folder. 
+2. Adapt the relevant input file depending on whether you want to rely on the internal correlation criterion (IC) or the group difference criterion (GD). 
+	- internal correlation: <img width="80" alt="image" src="https://user-images.githubusercontent.com/73498415/156186624-bf2d4c13-4da9-47bb-a9a6-34c27ddeebbc.png">
+	- group difference: <img width="300" alt="image" src="https://user-images.githubusercontent.com/73498415/156186716-bf9b9ab2-86bc-4045-9af7-61b0e9996536.png">
+a) IC: Open the InputFile_IC.csv and adapt the variables to define your model, statistic parameters and cut-off (tau). 
    <img width="634" alt="image" src="https://user-images.githubusercontent.com/73498415/151140185-b217a37f-8e7e-4618-baa7-89c205b28c49.png">
+	*_ntrials_: integer 𝜖 [5, +∞[
+		**number of trials within the experiment (minimal 5)**
+	*_nreversals_: integer 𝜖 [0, ntrials[
+		**number of rule reversals within the eximerpent**
+	*_npp_: integer 𝜖 [5, +∞[ 
+		**total number of participants within the experiment (minimal 5)**
+	*_meanLR_: float 𝜖 [0, 1]
+		**mean of the assumed population distribution of learning rates**
+	*_sdLR_: float 𝜖 [0, 1]
+		**sd of the assumed population distribution of learning rates**
+	*_meanInverseTemperature_: float 𝜖 [0, 1]
+		**mean of the assumed population distribution of inverse temperatures**
+	*_sdInverseTemperature_: float 𝜖 [0, 1]
+		**sd of the assumed population distribution of inverse temperatures**
+	* _reward_probability_: float 𝜖 [0, 1] 
+	     **The probability that reward will be congruent with the current stimulus-response mapping rule.**
+		- If reward_probability = 0.80, the feedback will be congruent with the rule in 80% of the trials.
+	*_tau_: float 𝜖 [0, 1] 
+		**the value against which the obtained statistic will be compared to define significance of the repetition.**
+		- correlation: cut_off = minimally desired correlation - recommended: 0.75
+	* _full_speed_: integer (0 or 1)
+		**Define whether you want to do the power analysis at full speed.**
+		- 0 = only one core will be used (slow)
+		- 1 = (all-2) cores will be used (much faster, recommended unless you need your computer for other intensive tasks such as meetings)
+	* _nreps_: integer 𝜖 [1, +∞[ 
+		**Number of repetitions that will be conducted to estimate the power**
+		- Recommended number: minimal 100
+	* _output_folder_: string
+		**Path to the folder where the output-figure(s) will be stored**
+		- e.g. "C:\Users\maudb\Downloads"
+
+b)
    * _ntrials_: integer 𝜖 [5, +∞[
      **number of trials within the experiment (minimal 5)**
    * _nreversals_: integer 𝜖 [0, ntrials[
