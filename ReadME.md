@@ -43,6 +43,7 @@ Each parameter recovery analysis consists of the following four steps:
 	- group difference: <img width="300" alt="image" src="https://user-images.githubusercontent.com/73498415/156186716-bf9b9ab2-86bc-4045-9af7-61b0e9996536.png">
 
 2a) IC: Open the InputFile_IC.csv and adapt the variables to define your model, statistic parameters and cut-off (tau). 
+
 <img width="634" alt="image" src="https://github.com/MaudBeeckmans/COMPASS/blob/Version-0.2/Figures/ReadMe/InputIC_example.png">
 * _ntrials_: integer 𝜖 [5, +∞[
 	**number of trials within the experiment (minimal 5)**
@@ -76,7 +77,8 @@ Each parameter recovery analysis consists of the following four steps:
 	- e.g. "C:\Users\maudb\Downloads"
 
 2b) GD: Open the InputFile_GD.csv and adapt the variables to define your model, statistic parameters and typeIerror. 
-<img width="634" alt="image" src="https://github.com/MaudBeeckmans/COMPASS/blob/Version-0.2/Figures/ReadMe/InputGD_example.png">
+
+<img width="850" alt="image" src="https://github.com/MaudBeeckmans/COMPASS/blob/Version-0.2/Figures/ReadMe/InputGD_example.png">
 * _ntrials_: integer 𝜖 [5, +∞[
 	**number of trials within the experiment (minimal 5)**
 * _nreversals_: integer 𝜖 [0, ntrials[
