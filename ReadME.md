@@ -162,4 +162,4 @@ This allows the researcher to elegantly compare the effect of changing a certain
 - Supervising professor: Tom Verguts
     * [E-mail me at Tom (dot) Verguts (at) UGent (dot) be](mailto:Tom.Verguts@UGent.be)
 
-**Last edit: 3 November 2023**
+**Last edit: 3 November 2022**
