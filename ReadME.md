@@ -43,7 +43,7 @@ Each parameter recovery analysis consists of the following four steps:
 	- group difference: <img width="300" alt="image" src="https://user-images.githubusercontent.com/73498415/156186716-bf9b9ab2-86bc-4045-9af7-61b0e9996536.png">
 
 2a) IC: Open the InputFile_IC.csv and adapt the variables to define your model, statistic parameters and cut-off (tau). 
-<img width="634" alt="image" src="https://user-images.githubusercontent.com/73498415/151140185-b217a37f-8e7e-4618-baa7-89c205b28c49.png">
+<img width="634" alt="image" src="https://github.com/MaudBeeckmans/COMPASS/blob/Version-0.2/Figures/ReadMe/InputIC_example.png">
 * _ntrials_: integer 𝜖 [5, +∞[
 	**number of trials within the experiment (minimal 5)**
 * _nreversals_: integer 𝜖 [0, ntrials[
@@ -76,6 +76,7 @@ Each parameter recovery analysis consists of the following four steps:
 	- e.g. "C:\Users\maudb\Downloads"
 
 2b) GD: Open the InputFile_GD.csv and adapt the variables to define your model, statistic parameters and typeIerror. 
+<img width="634" alt="image" src="https://github.com/MaudBeeckmans/COMPASS/blob/Version-0.2/Figures/ReadMe/InputGD_example.png">
 * _ntrials_: integer 𝜖 [5, +∞[
 	**number of trials within the experiment (minimal 5)**
 * _nreversals_: integer 𝜖 [0, ntrials[
@@ -118,7 +119,7 @@ Each parameter recovery analysis consists of the following four steps:
 Both Input files can contain multiple rows with different requirements or design-options. 
 If the file contains multiple rows, the power will be estimated using the variables defined within each row sequentially. 
 This allows the researcher to elegantly compare the effect of changing a certain variable on the power estimate.     
-<img width="634" alt="image" src="https://user-images.githubusercontent.com/73498415/151140016-1f564b1d-8532-42b2-96da-b3d6a5e5ff63.png">
+<img width="634" alt="image" src="https://github.com/MaudBeeckmans/COMPASS/blob/Version-0.2/Figures/ReadMe/Inputmultiplerows_example.png">
 
 3. Run the PowerAnalysis.py script using the correct Anaconda 3 environment. 
    
@@ -143,8 +144,8 @@ This allows the researcher to elegantly compare the effect of changing a certain
 
     Example output: 
     
-    <img width="800" alt="image" src="https://user-images.githubusercontent.com/73498415/157639967-e9a5643e-9796-416d-a1c4-df43b89f3dc7.png">
-    <img width="500" alt="image" src="https://user-images.githubusercontent.com/73498415/157640378-76d551ef-4524-4d15-8a4b-2174756bd9eb.png">
+    <img width="800" alt="image" src="https://github.com/MaudBeeckmans/COMPASS/blob/Version-0.2/Figures/ReadMe/OutputIC_shellexample.png">
+    <img width="500" alt="image" src="https://github.com/MaudBeeckmans/COMPASS/blob/Version-0.2/Figures/ReadMe/OutputIC_plotexample.png">
     
 # Contact
 
