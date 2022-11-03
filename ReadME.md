@@ -41,6 +41,7 @@ Each parameter recovery analysis consists of the following four steps:
 2. Adapt the relevant input file depending on whether you want to rely on the internal correlation criterion (IC) or the group difference criterion (GD). 
 	- internal correlation: <img width="80" alt="image" src="https://user-images.githubusercontent.com/73498415/156186624-bf2d4c13-4da9-47bb-a9a6-34c27ddeebbc.png">
 	- group difference: <img width="300" alt="image" src="https://user-images.githubusercontent.com/73498415/156186716-bf9b9ab2-86bc-4045-9af7-61b0e9996536.png">
+
 a) IC: Open the InputFile_IC.csv and adapt the variables to define your model, statistic parameters and cut-off (tau). 
    <img width="634" alt="image" src="https://user-images.githubusercontent.com/73498415/151140185-b217a37f-8e7e-4618-baa7-89c205b28c49.png">
 	*_ntrials_: integer 𝜖 [5, +∞[
