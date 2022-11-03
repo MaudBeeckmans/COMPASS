@@ -50,30 +50,30 @@ a) IC: Open the InputFile_IC.csv and adapt the variables to define your model, s
 	**number of rule reversals within the eximerpent**
 * _npp_: integer 𝜖 [5, +∞[ 
 	**total number of participants within the experiment (minimal 5)**
-	* _meanLR_: float 𝜖 [0, 1]
-		**mean of the assumed population distribution of learning rates**
-	* _sdLR_: float 𝜖 [0, 1]
-		**sd of the assumed population distribution of learning rates**
-	* _meanInverseTemperature_: float 𝜖 [0, 1]
-		**mean of the assumed population distribution of inverse temperatures**
-	* _sdInverseTemperature_: float 𝜖 [0, 1]
-		**sd of the assumed population distribution of inverse temperatures**
-	* _reward_probability_: float 𝜖 [0, 1] 
-	     **The probability that reward will be congruent with the current stimulus-response mapping rule.**
-		- If reward_probability = 0.80, the feedback will be congruent with the rule in 80% of the trials.
-	*_tau_: float 𝜖 [0, 1] 
-		**the value against which the obtained statistic will be compared to define significance of the repetition.**
-		- correlation: cut_off = minimally desired correlation - recommended: 0.75
-	* _full_speed_: integer (0 or 1)
-		**Define whether you want to do the power analysis at full speed.**
-		- 0 = only one core will be used (slow)
-		- 1 = (all-2) cores will be used (much faster, recommended unless you need your computer for other intensive tasks such as meetings)
-	* _nreps_: integer 𝜖 [1, +∞[ 
-		**Number of repetitions that will be conducted to estimate the power**
-		- Recommended number: minimal 100
-	* _output_folder_: string
-		**Path to the folder where the output-figure(s) will be stored**
-		- e.g. "C:\Users\maudb\Downloads"
+* _meanLR_: float 𝜖 [0, 1]
+	**mean of the assumed population distribution of learning rates**
+* _sdLR_: float 𝜖 [0, 1]
+	**sd of the assumed population distribution of learning rates**
+* _meanInverseTemperature_: float 𝜖 [0, 1]
+	**mean of the assumed population distribution of inverse temperatures**
+* _sdInverseTemperature_: float 𝜖 [0, 1]
+	**sd of the assumed population distribution of inverse temperatures**
+* _reward_probability_: float 𝜖 [0, 1] 
+	**The probability that reward will be congruent with the current stimulus-response mapping rule.**
+	- If reward_probability = 0.80, the feedback will be congruent with the rule in 80% of the trials.
+*_tau_: float 𝜖 [0, 1] 
+	**the value against which the obtained statistic will be compared to define significance of the repetition.**
+	- correlation: cut_off = minimally desired correlation - recommended: 0.75
+* _full_speed_: integer (0 or 1)
+	**Define whether you want to do the power analysis at full speed.**
+	- 0 = only one core will be used (slow)
+	- 1 = (all-2) cores will be used (much faster, recommended unless you need your computer for other intensive tasks such as meetings)
+* _nreps_: integer 𝜖 [1, +∞[ 
+	**Number of repetitions that will be conducted to estimate the power**
+	- Recommended number: minimal 100
+* _output_folder_: string
+	**Path to the folder where the output-figure(s) will be stored**
+	- e.g. "C:\Users\maudb\Downloads"
 
 b)
    * _ntrials_: integer 𝜖 [5, +∞[
