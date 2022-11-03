@@ -44,9 +44,10 @@ Each parameter recovery analysis consists of the following four steps:
 
 2a) IC: Open the InputFile_IC.csv and adapt the variables to define your model, statistic parameters and cut-off (tau). 
    <img width="634" alt="image" src="https://user-images.githubusercontent.com/73498415/151140185-b217a37f-8e7e-4618-baa7-89c205b28c49.png">
-* _ntrials_: integer 𝜖 [5, +∞[
+
+   * _ntrials_: integer 𝜖 [5, +∞[
 	**number of trials within the experiment (minimal 5)**
-* _nreversals_: integer 𝜖 [0, ntrials[
+   * _nreversals_: integer 𝜖 [0, ntrials[
 	**number of rule reversals within the eximerpent**
 * _npp_: integer 𝜖 [5, +∞[ 
 	**total number of participants within the experiment (minimal 5)**
@@ -133,7 +134,7 @@ This allows the researcher to elegantly compare the effect of changing a certain
    * Open Anaconda prompt
    * Now, run: ```conda activate pyPower```
    * Go to the directory where ```Functions.py```, ```PowerAnalysis.py``` and ```Input_file.csv``` are located using ```cd```
-   * Now, run: ```python PowerAnalysis.py```
+   * Now, run: ```python PowerAnalysis.py IC``` or ```python PowerAnalysis.py GD``` depending on whether you want to use the internal correlation criterion or the group difference criterion
 
 4. Check the output in the shell & the stored figure(s) in the _output_folder_
    * _power estimate_: the probability to obtain adequate parameter estimates
