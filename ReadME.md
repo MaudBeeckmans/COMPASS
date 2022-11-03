@@ -44,19 +44,19 @@ Each parameter recovery analysis consists of the following four steps:
 
 a) IC: Open the InputFile_IC.csv and adapt the variables to define your model, statistic parameters and cut-off (tau). 
    <img width="634" alt="image" src="https://user-images.githubusercontent.com/73498415/151140185-b217a37f-8e7e-4618-baa7-89c205b28c49.png">
-	*_ntrials_: integer 𝜖 [5, +∞[
-		**number of trials within the experiment (minimal 5)**
-	*_nreversals_: integer 𝜖 [0, ntrials[
-		**number of rule reversals within the eximerpent**
-	*_npp_: integer 𝜖 [5, +∞[ 
-		**total number of participants within the experiment (minimal 5)**
-	*_meanLR_: float 𝜖 [0, 1]
+* _ntrials_: integer 𝜖 [5, +∞[
+	**number of trials within the experiment (minimal 5)**
+* _nreversals_: integer 𝜖 [0, ntrials[
+	**number of rule reversals within the eximerpent**
+* _npp_: integer 𝜖 [5, +∞[ 
+	**total number of participants within the experiment (minimal 5)**
+	* _meanLR_: float 𝜖 [0, 1]
 		**mean of the assumed population distribution of learning rates**
-	*_sdLR_: float 𝜖 [0, 1]
+	* _sdLR_: float 𝜖 [0, 1]
 		**sd of the assumed population distribution of learning rates**
-	*_meanInverseTemperature_: float 𝜖 [0, 1]
+	* _meanInverseTemperature_: float 𝜖 [0, 1]
 		**mean of the assumed population distribution of inverse temperatures**
-	*_sdInverseTemperature_: float 𝜖 [0, 1]
+	* _sdInverseTemperature_: float 𝜖 [0, 1]
 		**sd of the assumed population distribution of inverse temperatures**
 	* _reward_probability_: float 𝜖 [0, 1] 
 	     **The probability that reward will be congruent with the current stimulus-response mapping rule.**
