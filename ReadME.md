@@ -35,7 +35,7 @@ Each parameter recovery analysis consists of the following four steps:
   4. Evaluate whether the parameter recovery analysis was successful. This depends on the parameter recovery criterion defined by the researcher. 	
      - _internal_correlation_: <img width="100" alt="image" src="https://user-images.githubusercontent.com/73498415/156185769-cad73153-2b53-4707-a266-67c376a00c79.png">
      - _group_difference_: <img width="50" alt="image" src="https://user-images.githubusercontent.com/73498415/156185831-2f654264-82a4-44e9-abd3-676033fb6cd9.png"> (success when p_value ≼ cut_off)
-## How to use COMPASS
+## How to use COMPASS.
 1. Download all files from this github-folder and store them in the same folder on your computer.
 
 2. Adapt the relevant input file depending on whether you want to rely on the internal correlation criterion (IC) or the group difference criterion (GD). 
