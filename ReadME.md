@@ -44,81 +44,81 @@ Each parameter recovery analysis consists of the following four steps:
 
 a) IC: Open the InputFile_IC.csv and adapt the variables to define your model, statistic parameters and cut-off (tau). 
    <img width="634" alt="image" src="https://user-images.githubusercontent.com/73498415/151140185-b217a37f-8e7e-4618-baa7-89c205b28c49.png">
-   * _ntrials_: integer 𝜖 [5, +∞[
+* _ntrials_: integer 𝜖 [5, +∞[
 	**number of trials within the experiment (minimal 5)**
-   * _nreversals_: integer 𝜖 [0, ntrials[
+* _nreversals_: integer 𝜖 [0, ntrials[
 	**number of rule reversals within the eximerpent**
-   * _npp_: integer 𝜖 [5, +∞[ 
+* _npp_: integer 𝜖 [5, +∞[ 
 	**total number of participants within the experiment (minimal 5)**
-   * _meanLR_: float 𝜖 [0, 1]
+* _meanLR_: float 𝜖 [0, 1]
 	**mean of the assumed population distribution of learning rates**
-   * _sdLR_: float 𝜖 [0, 1]
+* _sdLR_: float 𝜖 [0, 1]
 	**sd of the assumed population distribution of learning rates**
-   * _meanInverseTemperature_: float 𝜖 [0, 1]
+* _meanInverseTemperature_: float 𝜖 [0, 1]
 	**mean of the assumed population distribution of inverse temperatures**
-   * _sdInverseTemperature_: float 𝜖 [0, 1]
+* _sdInverseTemperature_: float 𝜖 [0, 1]
 	**sd of the assumed population distribution of inverse temperatures**
-   * _reward_probability_: float 𝜖 [0, 1] 
+* _reward_probability_: float 𝜖 [0, 1] 
 	**The probability that reward will be congruent with the current stimulus-response mapping rule.**
 	- If reward_probability = 0.80, the feedback will be congruent with the rule in 80% of the trials.
-   * _tau_: float 𝜖 [0, 1] 
+* _tau_: float 𝜖 [0, 1] 
 	**the value against which the obtained statistic will be compared to define significance of the repetition.**
 	- correlation: cut_off = minimally desired correlation - recommended: 0.75
-   * _full_speed_: integer (0 or 1)
+* _full_speed_: integer (0 or 1)
 	**Define whether you want to do the power analysis at full speed.**
 	- 0 = only one core will be used (slow)
 	- 1 = (all-2) cores will be used (much faster, recommended unless you need your computer for other intensive tasks such as meetings)
-   * _nreps_: integer 𝜖 [1, +∞[ 
+* _nreps_: integer 𝜖 [1, +∞[ 
 	**Number of repetitions that will be conducted to estimate the power**
 	- Recommended number: minimal 100
-   * _output_folder_: string
+* _output_folder_: string
 	**Path to the folder where the output-figure(s) will be stored**
 	- e.g. "C:\Users\maudb\Downloads"
 
-   b) IC: Open the InputFile_IC.csv and adapt the variables to define your model, statistic parameters and cut-off (tau). 
-   * _ntrials_: integer 𝜖 [5, +∞[
+b) IC: Open the InputFile_IC.csv and adapt the variables to define your model, statistic parameters and cut-off (tau). 
+* _ntrials_: integer 𝜖 [5, +∞[
 	**number of trials within the experiment (minimal 5)**
-   * _nreversals_: integer 𝜖 [0, ntrials[
+* _nreversals_: integer 𝜖 [0, ntrials[
 	**number of rule reversals within the eximerpent**
-   * _npp_group_: integer 𝜖 [5, +∞[ 
+* _npp_group_: integer 𝜖 [5, +∞[ 
 	**number of participants within the experiment (minimal 5)**
-   * _meanLR_g1_: float 𝜖 [0, 1]
+* _meanLR_g1_: float 𝜖 [0, 1]
 	**mean of the assumed population distribution of learning rates for group 1**
-   * _sdLR_: float 𝜖 [0, 1]
+* _sdLR_: float 𝜖 [0, 1]
 	**sd of the assumed population distribution of learning rates for group 1** 
-   * _meanLR_g2_: float 𝜖 [0, 1]
+* _meanLR_g2_: float 𝜖 [0, 1]
 	**mean of the assumed population distribution of learning rates for group 2**
-   * _sdLR_g2_: float 𝜖 [0, 1]
+* _sdLR_g2_: float 𝜖 [0, 1]
 	**sd of the assumed population distribution of learning rates for group 2** 
-   * _meanInverseTemperature_g1_: float 𝜖 [0, 1]
+* _meanInverseTemperature_g1_: float 𝜖 [0, 1]
 	**mean of the assumed population distribution of inverse temperatures for group 1**
-   * _sdInverseTemperature_g1_: float 𝜖 [0, 1]
+* _sdInverseTemperature_g1_: float 𝜖 [0, 1]
 	**sd of the assumed population distribution of inverse temperatures for group 1**
-   * _meanInverseTemperature_g2_: float 𝜖 [0, 1]
+* _meanInverseTemperature_g2_: float 𝜖 [0, 1]
 	**mean of the assumed population distribution of inverse temperatures for group 2**
-   * _sdInverseTemperature_g2_: float 𝜖 [0, 1]
+* _sdInverseTemperature_g2_: float 𝜖 [0, 1]
 	**sd of the assumed population distribution of inverse temperatures for group 2**
-   * _reward_probability_: float 𝜖 [0, 1] 
+* _reward_probability_: float 𝜖 [0, 1] 
 	**The probability that reward will be congruent with the current stimulus-response mapping rule.**
 	- If reward_probability = 0.80, the feedback will be congruent with the rule in 80% of the trials.
-   * _TypeIerror_: float 𝜖 [0, 1] 
+* _TypeIerror_: float 𝜖 [0, 1] 
 	**The allowed probability to make a type I error; the significance level**
 	- standard (and recommended) value: 0.05
-   * _full_speed_: integer (0 or 1)
+* _full_speed_: integer (0 or 1)
 	**Define whether you want to do the power analysis at full speed.**
 	- 0 = only one core will be used (slow)
 	- 1 = (all-2) cores will be used (much faster, recommended unless you need your computer for other intensive tasks such as meetings)
-   * _nreps_: integer 𝜖 [1, +∞[ 
+* _nreps_: integer 𝜖 [1, +∞[ 
 	**Number of repetitions that will be conducted to estimate the power**
 	- Recommended number: minimal 100
-   * _output_folder_: string
+* _output_folder_: string
 	**Path to the folder where the output-figure(s) will be stored**
 	- e.g. "C:\Users\maudb\Downloads"
     
-   Both Input files can contain multiple rows with different requirements or design-options. 
-   If the file contains multiple rows, the power will be estimated using the variables defined within each row sequentially. 
-   This allows the researcher to elegantly compare the effect of changing a certain variable on the power estimate.     
-   <img width="634" alt="image" src="https://user-images.githubusercontent.com/73498415/151140016-1f564b1d-8532-42b2-96da-b3d6a5e5ff63.png">
+Both Input files can contain multiple rows with different requirements or design-options. 
+If the file contains multiple rows, the power will be estimated using the variables defined within each row sequentially. 
+This allows the researcher to elegantly compare the effect of changing a certain variable on the power estimate.     
+<img width="634" alt="image" src="https://user-images.githubusercontent.com/73498415/151140016-1f564b1d-8532-42b2-96da-b3d6a5e5ff63.png">
 
 3. Run the PowerAnalysis.py script using the correct Anaconda 3 environment. 
    
