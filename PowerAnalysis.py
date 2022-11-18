@@ -4,7 +4,7 @@ Created on Tue Dec 14 11:04:23 2021
 
 @author: maudb
 """
-HPC = False
+
 
 import numpy as np
 import pandas as pd 
@@ -13,11 +13,9 @@ from Functions import create_design, correlation_repetition, groupdifference_rep
 from scipy import optimize
 from scipy import stats as stat
 from datetime import datetime
-
-if HPC == False: 
-    from statsmodels.stats.power import tt_ind_solve_power
-    import seaborn as sns
-    import matplotlib.pyplot as plt
+from statsmodels.stats.power import tt_ind_solve_power
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 
 def power_estimation_correlation(npp = 30, ntrials = 480, nreversals = 12, cut_off = 0.7, high_performance = False, 
@@ -56,8 +54,7 @@ def power_estimation_correlation(npp = 30, ntrials = 480, nreversals = 12, cut_o
     Power is calculated using a simulation-based approach.
     """
     start_design = create_design(ntrials = ntrials, nreversals = nreversals, reward_probability = reward_probability)
-    if HPC == True: n_cpu = cpu_count()
-    elif high_performance == True: n_cpu = cpu_count() - 2
+    if high_performance == True: n_cpu = cpu_count() - 2
     else: n_cpu = 1
 
     pool = Pool(processes = n_cpu)
@@ -121,37 +118,37 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
     start_design = create_design(ntrials = ntrials, nreversals = nreversals, reward_probability = reward_probability)
     if high_performance == True: n_cpu = cpu_count() - 2
     else: n_cpu = 1
-    if __name__ == '__main__': 
-        # First: check what the power is when true parameters would be recoverable 
-        if HPC == False: 
-            power = tt_ind_solve_power(nobs1 = npp_per_group, ratio = 1, effect_size = cohens_d, alpha = typeIerror, power = None, 
-                                    alternative = 'larger')
-            print("\nPower if estimates would be perfect: {}%".format(np.round(power, 4)*100))    
-        
-        
-        
-        LR_distributions = np.array([[mean_LRdistributionG1, SD_LRdistributionG1], [mean_LRdistributionG2, SD_LRdistributionG2]])
-        inverseTemp_distributions = np.array([[mean_inverseTempdistributionG1, SD_inverseTempdistributionG1], 
-                                              [mean_inverseTempdistributionG2, SD_inverseTempdistributionG2]])
-        
-        
-        pool = Pool(processes = n_cpu)
-        out = pool.starmap(groupdifference_repetition, [(inverseTemp_distributions, LR_distributions, npp_per_group, 
-                                                     ntrials, start_design, rep, nreps, n_cpu, False) for rep in range(nreps)])
-        # before calling pool.join(), should call pool.close() to indicate that there will be no new processing
-        pool.close()
-        pool.join()
-        # allreps_output = pd.DataFrame(out, columns = ['propfailed_estimates', 'p_values'])
-        allreps_output = pd.DataFrame(out, columns = ['Statistic', 'PValue'])
-        
-        # check for which % of repetitions the group difference was significant 
-        # note that we're working with a one-sided t-test (if interested in two-sided need to divide the p-value obtained at each rep with 2)
-        power_estimate = np.mean((allreps_output['PValue'] <= typeIerror))
-        print(str("\nPower to detect a significant group difference when the estimated effect size d = {}".format(cohens_d)
-              + " with {} trials and {} participants per group: {}%".format(ntrials, 
-                                                                         npp_per_group, power_estimate*100)))
-        # print("\nMean failed learning rate estimates per repetition: {}%".format(np.round(mean_propfailed_estimates*100, 2)))
-        return allreps_output, power_estimate
+    
+    # First: check what the power is when true parameters would be recoverable 
+    
+    power = tt_ind_solve_power(nobs1 = npp_per_group, ratio = 1, effect_size = cohens_d, alpha = typeIerror, power = None, 
+                            alternative = 'larger')
+    print("\nPower if estimates would be perfect: {}%".format(np.round(power, 4)*100))    
+    
+    
+    
+    LR_distributions = np.array([[mean_LRdistributionG1, SD_LRdistributionG1], [mean_LRdistributionG2, SD_LRdistributionG2]])
+    inverseTemp_distributions = np.array([[mean_inverseTempdistributionG1, SD_inverseTempdistributionG1], 
+                                          [mean_inverseTempdistributionG2, SD_inverseTempdistributionG2]])
+    
+    
+    pool = Pool(processes = n_cpu)
+    out = pool.starmap(groupdifference_repetition, [(inverseTemp_distributions, LR_distributions, npp_per_group, 
+                                                 ntrials, start_design, rep, nreps, n_cpu, False) for rep in range(nreps)])
+    # before calling pool.join(), should call pool.close() to indicate that there will be no new processing
+    pool.close()
+    pool.join()
+    # allreps_output = pd.DataFrame(out, columns = ['propfailed_estimates', 'p_values'])
+    allreps_output = pd.DataFrame(out, columns = ['Statistic', 'PValue'])
+    
+    # check for which % of repetitions the group difference was significant 
+    # note that we're working with a one-sided t-test (if interested in two-sided need to divide the p-value obtained at each rep with 2)
+    power_estimate = np.mean((allreps_output['PValue'] <= typeIerror))
+    print(str("\nPower to detect a significant group difference when the estimated effect size d = {}".format(cohens_d)
+          + " with {} trials and {} participants per group: {}%".format(ntrials, 
+                                                                     npp_per_group, power_estimate*100)))
+    # print("\nMean failed learning rate estimates per repetition: {}%".format(np.round(mean_propfailed_estimates*100, 2)))
+    return allreps_output, power_estimate
 
 #%%
 
@@ -204,12 +201,12 @@ if __name__ == '__main__':
             output.to_csv(os.path.join(output_folder, 'OutputIC{}SD{}T{}R{}N{}M.csv'.format(s_pooled, ntrials,
                                                                                       nreversals, 
                                                                                       npp, nreps)))
-            if HPC == False: 
-                fig, axes = plt.subplots(nrows = 1, ncols = 1)
-                sns.kdeplot(output["correlations"], label = "correlations", ax = axes)
-                fig.suptitle("P(correlation >= {} with {} pp, {} trials)".format(tau, npp, ntrials), fontweight = 'bold')
-                axes.set_title("Power = {}% based on {} reps".format(np.round(power_estimate*100, 2), nreps))
-                axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
+            
+            fig, axes = plt.subplots(nrows = 1, ncols = 1)
+            sns.kdeplot(output["correlations"], label = "correlations", ax = axes)
+            fig.suptitle("P(correlation >= {} with {} pp, {} trials)".format(tau, npp, ntrials), fontweight = 'bold')
+            axes.set_title("Power = {}% based on {} reps".format(np.round(power_estimate*100, 2), nreps))
+            axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
             
         elif criterion == "GD": 
             npp_pergroup = InputDictionary['npp_group'][row]
@@ -235,12 +232,12 @@ if __name__ == '__main__':
                                                                                                 ntrials,
                                                                                       nreversals, 
                                                                                       npp, nreps, cohens_d)))
-            if HPC == False: 
-                fig, axes = plt.subplots(nrows = 1, ncols = 1)
-                sns.kdeplot(output["Statistic"], label = "T", ax = axes)
-                fig.suptitle("P(p-value <= {}) with {} pp, {} trials".format(typeIerror, npp_pergroup, ntrials), fontweight = 'bold')
-                axes.set_title("Power = {}% based on {} reps with ES = {}".format(np.round(power_estimate*100, 2), nreps, cohens_d))
-                axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
+            
+            fig, axes = plt.subplots(nrows = 1, ncols = 1)
+            sns.kdeplot(output["Statistic"], label = "T", ax = axes)
+            fig.suptitle("P(p-value <= {}) with {} pp, {} trials".format(typeIerror, npp_pergroup, ntrials), fontweight = 'bold')
+            axes.set_title("Power = {}% based on {} reps with ES = {}".format(np.round(power_estimate*100, 2), nreps, cohens_d))
+            axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
             
             
             
@@ -248,14 +245,14 @@ if __name__ == '__main__':
         
         else: print("Criterion not found")
         #final adaptations to the output figure & store the figure 
-        if HPC == False: 
-            fig.legend(loc = 'center right')
-            fig.tight_layout()
-            fig.savefig(os.path.join(output_folder, 'Plot{}{}T{}R{}N{}M.jpg'.format(criterion, 
-                                                                                    np.round(s_pooled, 2),
-                                                                                    ntrials, nreversals, 
-                                                                                    npp, nreps)))
         
+        fig.legend(loc = 'center right')
+        fig.tight_layout()
+        fig.savefig(os.path.join(output_folder, 'Plot{}{}T{}R{}N{}M.jpg'.format(criterion, 
+                                                                                np.round(s_pooled, 2),
+                                                                                ntrials, nreversals, 
+                                                                                npp, nreps)))
+    
         # measure how long the power estimation lasted 
         end_time = datetime.now()
         print("\nPower analysis ended at {}; run lasted {} hours.".format(end_time, end_time-start_time))
