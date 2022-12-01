@@ -19,6 +19,7 @@ if HPC == False:
     import seaborn as sns
     import matplotlib.pyplot as plt
 
+#This is to avoid warnings being printed to the terminal window
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -149,7 +150,7 @@ def power_estimation_Excorrelation(npp = 100, ntrials = 480, nreversals = 12, ty
     pool = Pool(processes = n_cpu)
     LR_distribution = np.array([mean_LRdistribution, SD_LRdistribution])
     inverseTemp_distribution = np.array([mean_inverseTempdistribution, SD_inverseTempdistribution])
-    out = pool.starmap(extcorrelation_repetition, [(inverseTemp_distribution, LR_distribution, True_correlation, npp, ntrials,
+    out = pool.starmap(Excorrelation_repetition, [(inverseTemp_distribution, LR_distribution, True_correlation, npp, ntrials,
                                                  start_design, rep, nreps, n_cpu) for rep in range(nreps)])
     pool.close()
     pool.join()
