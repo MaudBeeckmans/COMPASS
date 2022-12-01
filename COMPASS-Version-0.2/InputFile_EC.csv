@@ -1,0 +1,2 @@
+ntrials,nreversals,npp,meanLR,sdLR,meanInverseTemperature,sdInverseTemperature,True_correlation,reward_probability,TypeIerror,nreps,full_speed,output_folder
+200,1,50,0.7,0.1,1.5,0.5,0.5,0.8,0.05,100,1,/Users/pieter/Desktop

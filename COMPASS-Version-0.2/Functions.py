@@ -10,6 +10,9 @@ import os, time
 from scipy import optimize
 from scipy import stats as stat
 
+#This is to avoid warnings being printed to the terminal window
+import warnings
+warnings.filterwarnings('ignore')
 
 #%%
 def LR_retransformation(transformed_LR = 1.3):
@@ -21,7 +24,7 @@ def InverseT_retransformation(transformed_InverseT = 3):
     return original_InverseT
 
 #%% Functions that are used within other functions in this 'functions' script
-def generate_parameters(mean = 0.5, std = 0.1, npp = 1):
+def generate_parameters(mean = 0.5, std = 0.1, npp = 1, multivariate = False, corr = False):
     """
     Parameters
     ----------
@@ -31,7 +34,10 @@ def generate_parameters(mean = 0.5, std = 0.1, npp = 1):
         The standard deviation of the normal distribution from which parameters are drawn. The default is 0.1.
     size : float, optional
         The number of parameters that are drawn from the normal distribution. The default is 1.
-
+    multivariate: boolean, optional
+        Put to true for the external correlation criterion such that values are drawn from multivariate normal distribution. The default is False.
+    corr: boolean or float, optional
+        The correlation for the external correlation criterion. For other criterions this is ignored. The default is False.
     Returns
     -------
     parameters : numpy array
@@ -41,12 +47,23 @@ def generate_parameters(mean = 0.5, std = 0.1, npp = 1):
     -----------
     Function to draw 'npp' parameters from a normal distribution with mean 'mean' and standard deviation 'std'.
     Function is used to generate learning rate and inverse temperature parameters for each participant.
-    No parameters get a value lower than or equal to 0."""
-    # draw 'npp' values from normal distribution with mean 'mean' and standard deviation 'std'
-    parameters = np.round(np.random.normal(loc = mean, scale = std, size = npp), 3)
-    # while-loop: ensure no parameters get a value smaller than or equal to 0
-    while np.any(parameters <= 0):
-        parameters = np.where(parameters <= 0,
+    No parameters get a value lower than or equal to 0.
+    When the criterion is external correlation, learning rate and the external measure are drawn from a multivariate normal distribution.
+    Here, the correlation is specified in the covariance matrix."""
+
+    if multivariate:
+        # draw 'npp' values from multivariate normal distribution with mean 'mean', standard deviation 'std' and correlation 'cor'
+        parameters =np.round(np.random.multivariate_normal([mean, 0], np.array([[corr*std, std], [std, corr*std]]), npp),3)
+        # while-loop: ensure no learning rate parameters get a value smaller than or equal to 0
+        while np.any(parameters[:,0] <= 0):
+            to_replace = np.where(parameters[:,0] <= 0)[0]
+            parameters[to_replace, :] = np.round(np.random.multivariate_normal([mean, 0], np.array([[corr*std, std], [std, corr*std]]), len(to_replace)),3)
+    else:
+        # draw 'npp' values from normal distribution with mean 'mean' and standard deviation 'std'
+        parameters = np.round(np.random.normal(loc = mean, scale = std, size = npp), 3)
+        # while-loop: ensure no parameters get a value smaller than or equal to 0
+        while np.any(parameters <= 0):
+            parameters = np.where(parameters <= 0,
                               np.round(np.random.normal(loc = mean, scale = std, size = 1), 3),
                               parameters)
     return parameters # shape ('npp',)
@@ -73,8 +90,7 @@ def softmax(values = np.array([0.5, 0.5]), inverse_temperature = 1):
     The inverse temperature parameter captures the weight given to the value difference between the two response options. With a low inverse temperature,
     more weight is given to the option with the highest value ('exploiting the best option'). A higher inverse tempererature relies more on 'exploration in order to find better options',
     thus increases the probability of choosing the lower value option.
-    The softmax function is: probability(response X) = exp(value_responseX*inverse_temperature) / (exp(value_response0*inverse_temperature) + exp(value_response1*inverse_temperature)) with X = 0 or x = 1.
-    """
+    The softmax function is: probability(response X) = exp(value_responseX*inverse_temperature) / (exp(value_response0*inverse_temperature) + exp(value_response1*inverse_temperature)) with X = 0 or x = 1."""
     # softmax function
     response_probabilities = np.exp(values*inverse_temperature) / np.sum((np.exp(values*inverse_temperature)))
     return response_probabilities
@@ -99,8 +115,8 @@ def choose_response(response_probabilities = np.array([0.5, 0.5])):
     If this value is smaller than or equal to the probability to choose response 1 (response_probabilities[1]), then response 1 is chosen.
     If this value is larger than the probability to choose response 1, response 0 is chosen."""
     response = (np.random.random() <= response_probabilities[1])*1
-    ##sortresps = np.argsort(response_probabilities)[::-1]
-    ##response = sortresps[np.where(np.random.random() <= np.cumsum(response_probabilities[sortresps]))[0][0]]
+    #sortresps = np.argsort(response_probabilities)[::-1]
+    #response = sortresps[np.where(np.random.random() <= np.cumsum(response_probabilities[sortresps]))[0][0]]
     return response
 
 def delta_rule(previous_value = 0.0, obtained_reward = 1.0, LR = 0.1):
@@ -245,8 +261,6 @@ def likelihood(parameter_set, data):
 #Prepare the likelihood estimation process: make sure all relevant variables are defined
     # the start values for each stimulus-response pair: these are the same as in the simulate_responses function
     values = np.array([[0.5, 0.5], [0.5, 0.5]])
-    ##alternatively: np.ones(nstim, nresp)*0.5
-    
     ntrials = data.shape[0] # deduce number of trials within the experiment from the length of the design matrix
     # Define the response accuracy on each trial: (responses == correct_responses)*1
         # remember: correct_responses depends on the stimulus-response mapping rule and does not necessarily mean reward is delivered
@@ -284,7 +298,7 @@ def likelihood(parameter_set, data):
             # loglikelihoods = np.array([-999, -999])
             summed_logL = -9999
             break
-        else: loglikelihoods = stimulus_weights*retransformed_invT - np.log(np.sum((np.exp(stimulus_weights[0]*retransformed_invT)+np.exp(stimulus_weights[1]*retransformed_invT)))) ##waarom niet met softmax ?
+        else: loglikelihoods = stimulus_weights*retransformed_invT - np.log(np.sum((np.exp(stimulus_weights[0]*retransformed_invT)+np.exp(stimulus_weights[1]*retransformed_invT))))
 
         #then select the probability of the actual response given the parameter set
         current_loglikelihood = loglikelihoods[response]
@@ -387,7 +401,7 @@ def create_design(ntrials = 480, nreversals = 1, reward_probability = 0.8):
     design = design_df.to_numpy(dtype = int)
     return design
 
-def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntrials, start_design, rep, nreps, ncpu):
+def Incorrelation_repetition(inverseTemp_distribution, LR_distribution, npp, ntrials, start_design, rep, nreps, ncpu):
     """
 
     Parameters
@@ -407,20 +421,20 @@ def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntria
         For more details on this design see function create_design()
     rep : integer
         Which repetition of the power estimation process is being executed.
+    nreps: integer
+        The total amount of repetitions.
+    ncpu:
+        The amount of cpu available.
 
     Returns
     -------
-    proportion_failed_estimates : float, within range [0, 1]
-        Percentage of participants for which the parameter estimation process failed this parameter recovery analysis = nfailed_estimates / npp.
-        An estimation fails when the recovered learning rate is smaller than or equal 0.1. When this happens the estimation is repeated maximal five times.
-        If the estimation failed each of these five times, the estimation for this participant has failed.
     Statistic : float
         The correlation found between the true and recovered parameters this repetition.
 
     Description
     -----------
-    Function to execute the parameter recovery analysis once. The success of this parameter recovery analysis is here evaluated using the correlation criterion.
-    This criterion prescribes that parameter recovery is successful when: correlation(true learning rates, recovered learning rates) >= certain cut-off.
+    Function to execute the parameter recovery analysis (Internal correlation criterion) once.
+    This criterion prescribes that resources are sufficient when: correlation(true learning rates, recovered learning rates) >= certain cut-off.
     Thus, the statistic of interest is: correlation(true learning rates, recovered learning rates). This statistic is returned for execution of this function (thus for each repetition).
     In order to calculate the statistic the parameter recovery analysis has to be completed. This analysis consists of several steps:
         1. Create 'npp' hypothetical participants by defining 'npp' parameter sets.
@@ -439,20 +453,15 @@ def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntria
             The parameter set with the highest log-likelihood given the data is selected. For more details on the likelihood estimation process see function 'likelihood'.
         4. Calculate the Statistic of interest for this repetition of the parameter recovery analysis.
             The statistic that is calculated here is correlation(true learning rates, recovered learning rates).
-    If this function is repeated a number of times and the value of the Statistic is stored each time, we can evaluate later on the power or probability to meet the proposed parameter recovery criterion (the correlation criterion) in a single study.
-    The function also tracks for how many hypothetical participants the parameter estimation processes failed. A parameter estimation process fails when the recovered parameter set yields a learning rate estimate < 0.1 five times in a row.
+    If this function is repeated a number of times and the value of the Statistic is stored each time, we can evaluate later on the power or probability to meet the proposed parameter recovery criterion (the internal correlation criterion) in a single study.
     """
     if rep == 0:
         t0 = time.time()
-    nfailed_estimates = 0 # keep track of number of failed estimates per repetition
-    failed_estimates = np.array([], dtype = int) # keep track of which pp param. estimation failed for
-        # so we can delete these pp. in the correlation or group difference estimation
 
     ####PART 1: parameter generation for all participants####
     # Define the True params that will be used for each pp in this rep
     True_LRs =  generate_parameters(mean = LR_distribution[0], std = LR_distribution[1], npp = npp)
     True_inverseTemps = generate_parameters(mean = inverseTemp_distribution[0], std = inverseTemp_distribution[1], npp = npp)
-
 
     # loop over all pp. to do the data generation and parameter estimation
     # create array that will contain the final LRestimate for each participant this repetition
@@ -472,8 +481,7 @@ def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntria
         optimization_output = optimize.minimize(likelihood, start_params, args =(tuple([start_design])),
                                         method = 'Nelder-Mead',
                                         options = {'maxfev':1000, 'xatol':0.01, 'return_all':1})
-        if optimization_output.success == False:
-            print("optimization failed")
+
         estimated_parameters = optimization_output['x']
         estimated_LR = LR_retransformation(estimated_parameters[0])
         estimated_invT = InverseT_retransformation(estimated_parameters[1])
@@ -483,11 +491,8 @@ def correlation_repetition(inverseTemp_distribution, LR_distribution, npp, ntria
 
     ####Part 4: correlation between true & estimated learning rates####
     # if the estimation failed for a certain participant, delete this participant from the correlation estimation for this repetition
-    if nfailed_estimates == 0:
-        Statistic = np.round(np.corrcoef(True_LRs, LRestimations)[0, 1], 2)
-    else:
-        Statistic = np.round(np.corrcoef(np.delete(True_LRs, failed_estimates),
-                                       np.delete(LRestimations, failed_estimates))[0, 1], 2)
+    Statistic = np.round(np.corrcoef(True_LRs, LRestimations)[0, 1], 2)
+
     if rep == 0:
         t1 = time.time() - t0
         estimated_seconds = t1 * np.ceil(nreps / ncpu)
@@ -509,8 +514,8 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
         Defines the mean & standard deviation of the normal distributions that will be used to draw the learning rates from for each hypothetical participant.
         Mean of the distribution for group 0 = LR_distribution[0, 0], standard deviation of the distribution for group 0 = LR_distribution[0, 1].
         Mean of the distribution for group 1 = LR_distribution[1, 0], standard deviation of the distribution for group 1 = LR_distribution[1, 1].
-    npp : integer
-        Number of participants that will be used in the parameter recovery analysis.
+    npp_per_group : integer
+        Number of participants in each group that will be used in the parameter recovery analysis.
     ntrials : integer
         Number of trials that will be used to do the parameter recovery analysis for each participant.
     start_design : numpy array, shape = (ntrials X 5)
@@ -518,13 +523,13 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
         For more details on this design see function create_design()
     rep : integer
         Which repetition of the power estimation process is being executed.
+    nreps: integer
+        The total amount of repetitions.
+    ncpu:
+        The amount of cpu available.
 
     Returns
     -------
-    proportion_failed_estimates : float, within range [0, 1]
-        Percentage of participants for which the parameter estimation process failed this parameter recovery analysis = nfailed_estimates / npp.
-        An estimation fails when the recovered learning rate is smaller than or equal 0.1. When this happens the estimation is repeated maximal five times.
-        If the estimation failed each of these five times, the estimation for this participant has failed.
     pValue : float
         Probability to find these recovered learning rate values within the two groups when the two groups would be drawn from the same distribution.
         This probaility is calculated using a two-sample t-test comparing the recovered learning rates for group 0 and group 1.
@@ -532,8 +537,8 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
 
     Description
     -----------
-    Function to execute the parameter recovery analysis once. The success of this parameter recovery analysis is here evaluated using the group difference criterion.
-    This criterion prescribes that parameter recovery is successful when a significant group difference is found using the recovered parameters for all participants.
+    Function to execute the group difference statistic once.
+    This criterion prescribes that resources are sufficient when a significant group difference is found using the recovered parameters for all participants.
     Thus, the statistic of interest is the p-value returned by a two-sample t-test comparing the recovered parameters of group 0 with the recovered parameters of group 1.
     The group difference is statistically significant when the p-value is smaller than or equal to a specified cut_off (we use a one-sided t-test).
     In order to calculate the statistic the parameter recovery analysis has to be completed. This analysis consists of several steps:
@@ -555,19 +560,14 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
         4. Calculate the Statistic of interest for this repetition of the parameter recovery analysis.
             The statistic that is calculated here is the p-value associated with the T-statistic which is obtained by a two-sample t-test comparing the recovered LRs for group 0 with the recovered LRs for group 1.
     If this function is repeated a number of times and the value of the Statistic is stored each time, we can evaluate later on the power or probability to meet the proposed parameter recovery criterion (group difference criterion) in a single study.
-    The function also tracks for how many hypothetical participants the parameter estimation processes failed. A parameter estimation process fails when the recovered parameter set yields a learning rate estimate < 0.1 five times in a row.
-
-
-    Function that is used to calculate the Statistic (in this case t_test(LR_estimates_g0, LR_estimates_g1)) at each repetition.
-    The pValue associated with this statistic is returned and later on used to determine whether the group difference is significant.
-    This function will be repeated nrep times, each time resulting in a specific Statistic and pValue.
-    The functions also returns the percentage of failed LR estimates for this repetition.
     """
     if rep == 0:
         t0 = time.time()
+
     # create array that will contain the final LRestimate for each participant this repetition
     LRestimations = np.empty([2, npp_per_group])
     InvTestimations = np.empty([2, npp_per_group])
+
     for group in range(2):
         ####PART 1: parameter generation for all participants####
         # Define the True params that will be used for each pp in this rep
@@ -575,33 +575,28 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
         True_inverseTemps = generate_parameters(mean = inverseTemp_distributions[group, 0], std = inverseTemp_distributions[group, 1], npp = npp_per_group)
 
         # loop over all pp. to do the data generation and parameter estimation
-        if standard_power == True:
-            LRestimations[group, :] = True_LRs
-            InvTestimations[group, :] = True_inverseTemps
-        else:
-            for pp in range(npp_per_group):
-                ####Part 2: Data simulation for this participant####
-                # generate the responses for this participant
-                responses = simulate_responses(simulation_LR=True_LRs[pp], simulation_inverseTemp=True_inverseTemps[pp],
+        for pp in range(npp_per_group):
+            ####Part 2: Data simulation for this participant####
+            # generate the responses for this participant
+            responses = simulate_responses(simulation_LR=True_LRs[pp], simulation_inverseTemp=True_inverseTemps[pp],
                                         design=start_design)
-                # fill in the responses of this participant into the start design, in order to use this later in param. estimation
-                start_design[:, 2] = responses
+            # fill in the responses of this participant into the start design, in order to use this later in param. estimation
+            start_design[:, 2] = responses
 
-                ####Part 3: parameter estimation for this participant####
-                # use gradient descent to find the optimal parameters for this participant
+            ####Part 3: parameter estimation for this participant####
+            # use gradient descent to find the optimal parameters for this participant
 
-                start_params = np.random.uniform(-4.5, 4.5), np.random.uniform(-4.6, 2)
-                optimization_output = optimize.minimize(likelihood, start_params, args =(tuple([start_design])),
-                                                method = 'Nelder-Mead',
-                                                options = {'maxfev':1000, 'xatol':0.01, 'return_all':1})
-                if optimization_output.success == False:
-                    print("optimization failed")
-                estimated_parameters = optimization_output['x']
-                estimated_LR = LR_retransformation(estimated_parameters[0])
-                estimated_invT = InverseT_retransformation(estimated_parameters[1])
+            start_params = np.random.uniform(-4.5, 4.5), np.random.uniform(-4.6, 2)
+            optimization_output = optimize.minimize(likelihood, start_params, args =(tuple([start_design])),
+                                            method = 'Nelder-Mead',
+                                            options = {'maxfev':1000, 'xatol':0.01, 'return_all':1})
 
-                LRestimations[group, pp] = estimated_LR
-                InvTestimations[group, pp] = estimated_invT
+            estimated_parameters = optimization_output['x']
+            estimated_LR = LR_retransformation(estimated_parameters[0])
+            estimated_invT = InverseT_retransformation(estimated_parameters[1])
+
+            LRestimations[group, pp] = estimated_LR
+            InvTestimations[group, pp] = estimated_invT
 
     # use two-sided then divide by to, this way we can use the same formula for HPC and non HPC
     Statistic, pValue = stat.ttest_ind(LRestimations[0, :], LRestimations[1, :]) # default: alternative = two-sided
@@ -611,7 +606,117 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
         estimated_seconds = t1 * nreps / ncpu
         estimated_time = np.ceil(estimated_seconds / 60)
         print("The power analysis will take ca. {} minutes".format(estimated_time))
+
     return Statistic, pValue
+
+def Excorrelation_repetition(inverseTemp_distribution, LR_distribution, true_correlation, npp, ntrials, start_design, rep, nreps, ncpu):
+    """
+
+    Parameters
+    ----------
+    inverseTemp_distribution : numpy array, shape = (2,)
+        Defines the mean & standard deviation of the normal distribution that will be used to draw the true inverse Temperature values from for each hypothetical participant.
+        Mean of the distribution = inverseTemp_distribution[0], standard deviation of the distribution = inverseTemp_distribution[1]
+    LR_distribution : numpy array, shape = (2,)
+        Defines the mean & standard deviation of the normal distribution that will be used to draw the true learning rate values from for each hypothetical participant.
+        Mean of the distribution = LR_distribution[0], standard deviation of the distribution = LR_distribution[1].
+    true_correlation: float
+        Defines the hypothesized correlation between the learning rate parameter and an external parameter.
+    npp : integer
+        Number of participants that will be used in the parameter recovery analysis.
+    ntrials : integer
+        Number of trials that will be used to do the parameter recovery analysis for each participant.
+    start_design : numpy array, shape = (ntrials X 5)
+        Design that will be used to simulate data for this repetition and to estimate the parameters as well.
+        For more details on this design see function create_design()
+    rep : integer
+        Which repetition of the power estimation process is being executed.
+    nreps: integer
+        The total amount of repetitions.
+    ncpu:
+        The amount of cpu available.
+
+    Returns
+    -------
+    Statistic : float
+        The correlation found between the external measure and recovered parameters this repetition.
+    pValue : float
+        The pvalue for this correlation.
+    Stat_true : float
+        The pvalue for the correlation between the external measure and true parameters. Indicating the power if estimations would be perfect.
+
+    Description
+    -----------
+    Function to execute the external correlation statistic once.
+    This criterion prescribes that resources are sufficient when: correlation(external measure, recovered learning rates) >= certain cut-off.
+    Thus, the statistic of interest is: correlation(measure, recovered learning rates). The correlation is statistically significant when the p-value is smaller than or equal to a specified cut_off.
+    In order to calculate the statistic the parameter recovery analysis has to be completed. This analysis consists of several steps:
+        1. Create 'npp' hypothetical participants by defining 'npp' parameter sets.
+            A parameter set consists of a value for the learning rate and a value for the inverse temperature.
+            Additionally, we sample some external measures by considering a multivariate normal distribution for learning rate and theta.
+            One population is assumed with the following parameter distributions:
+        2. Simulate data for each hypothetical participant (thus each parameter set)
+            This is done by simulating responses using the Rescorla-Wagner model (RW-model) with the values of the free parameters = the parameter set of this hypothetical participant.
+            This basic RW-model incorporates a delta-learning rule and a softmax choice rule.
+            (for details on the basic RW-model see ... (github-link naar ReadME))
+        3. Estimate the best fitting parameter set given the simulated data: best fitting parameter set = 'recovered parameter values'
+            This is done using the Maximum log-Likelihood estimation process in combination with the basic RW-model: iteratively estimating the log-likelihood of different parameter values given the data.
+            The parameter set with the highest log-likelihood given the data is selected. For more details on the likelihood estimation process see function 'likelihood'.
+        4. Calculate the Statistic of interest for this repetition of the analysis.
+            The statistic that is calculated here is correlation(measure, recovered learning rates).
+    If this function is repeated a number of times and the value of the Statistic is stored each time, we can evaluate later on the power or probability to meet the proposed parameter recovery criterion (the external correlation criterion) in a single study.
+    """
+
+    if rep == 0:
+        t0 = time.time()
+
+    ####PART 1: parameter generation for all participants####
+    # Define the True params that will be used for each pp in this rep
+    correlated_values = generate_parameters(mean = LR_distribution[0], std = LR_distribution[1], npp = npp, multivariate = True, corr = true_correlation)
+    True_LRs =  correlated_values[:,0]
+    True_inverseTemps = generate_parameters(mean = inverseTemp_distribution[0], std = inverseTemp_distribution[1], npp = npp)
+    Theta =  correlated_values[:,1]
+
+    # loop over all pp. to do the data generation and parameter estimation
+    # create array that will contain the final LRestimate for each participant this repetition
+    LRestimations = np.empty(npp)
+    invTestimations = np.empty(npp)
+    for pp in range(npp):
+
+        ####Part 2: Data simulation for this participant####
+        # generate the responses for this participant
+        responses = simulate_responses(simulation_LR=True_LRs[pp], simulation_inverseTemp=True_inverseTemps[pp],
+                                design=start_design)
+        # fill in the responses of this participant into the start design, in order to use this later in param. estimation
+        start_design[:, 2] = responses
+
+        ####Part 3: parameter estimation for this participant####
+        start_params = np.random.uniform(-4.5, 4.5), np.random.uniform(-4.6, 2)
+        optimization_output = optimize.minimize(likelihood, start_params, args =(tuple([start_design])),
+                                        method = 'Nelder-Mead',
+                                        options = {'maxfev':1000, 'xatol':0.01, 'return_all':1})
+
+        estimated_parameters = optimization_output['x']
+        estimated_LR = LR_retransformation(estimated_parameters[0])
+        estimated_invT = InverseT_retransformation(estimated_parameters[1])
+
+        LRestimations[pp] = estimated_LR
+        invTestimations[pp] = estimated_invT
+
+    ####Part 4: correlation between true & estimated learning rates####
+    # if the estimation failed for a certain participant, delete this participant from the correlation estimation for this repetition
+    Stat_true = stat.pearsonr(Theta, True_LRs)[1]
+    Stat = stat.pearsonr(Theta, LRestimations)
+    Statistic = Stat[0]
+    pValue = Stat[1]
+
+    if rep == 0:
+        t1 = time.time() - t0
+        estimated_seconds = t1 * np.ceil(nreps / ncpu)
+        estimated_time = np.ceil(estimated_seconds / 60)
+        print("The power analysis will take ca. {} minutes".format(estimated_time))
+    # return proportion_failed_estimates, Statistic
+    return Statistic, pValue, Stat_true
 
 #%%
 def check_input_parameters(ntrials, nreversals, npp, reward_probability, full_speed, criterion, significance_cutoff, cohens_d, nreps, plot_folder):
