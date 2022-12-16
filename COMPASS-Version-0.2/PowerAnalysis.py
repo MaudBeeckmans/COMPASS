@@ -19,7 +19,6 @@ if HPC == False:
     import seaborn as sns
     import matplotlib.pyplot as plt
 
-#This is to avoid warnings being printed to the terminal window
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -144,13 +143,13 @@ def power_estimation_Excorrelation(npp = 100, ntrials = 480, nreversals = 12, ty
     beta_distribution = stat.beta((npp/2)-1, (npp/2)-1, loc = -1, scale = 2)
     true_pValue = 1-beta_distribution.cdf(True_correlation)
 
-    print(str("\np-value for true correlation is :{}\n".format(np.round(true_pValue,5))))
+    print(str("\np-value for true correlation is :{}%\n".format(true_pValue)))
 
     #divide process over multiple cores
     pool = Pool(processes = n_cpu)
     LR_distribution = np.array([mean_LRdistribution, SD_LRdistribution])
     inverseTemp_distribution = np.array([mean_inverseTempdistribution, SD_inverseTempdistribution])
-    out = pool.starmap(Excorrelation_repetition, [(inverseTemp_distribution, LR_distribution, True_correlation, npp, ntrials,
+    out = pool.starmap(extcorrelation_repetition, [(inverseTemp_distribution, LR_distribution, True_correlation, npp, ntrials,
                                                  start_design, rep, nreps, n_cpu) for rep in range(nreps)])
     pool.close()
     pool.join()
@@ -159,7 +158,7 @@ def power_estimation_Excorrelation(npp = 100, ntrials = 480, nreversals = 12, ty
 
     #Compute power if estimates would be perfect.
     power_true = np.mean((allreps_output['True_pValue'] <= typeIerror)*1)
-    print(str("\nPower to obtain a significant correlation under conventional implementation: {}%".format(power_true*100)))
+    print(str("\nPower to obtain a significant correlation if parameter estimates were perfect {}%".format(power_true*100)))
 
     #Compute power for correlation with estimated parameter values.
     power_estimate = np.mean((allreps_output['estimated_pValue'] <= typeIerror)*1)
@@ -230,7 +229,7 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
         if HPC == False:
             power = tt_ind_solve_power(nobs1 = npp_per_group, ratio = 1, effect_size = cohens_d, alpha = typeIerror, power = None,
                                     alternative = 'larger')
-            print("\nPower to obtain a significant group difference under conventional implementation: {}%".format(np.round(power, 4)*100))
+            print("\nPower if estimates would be perfect: {}%".format(np.round(power, 4)*100))
 
         #divide process over multiple cores
         LR_distributions = np.array([[mean_LRdistributionG1, SD_LRdistributionG1], [mean_LRdistributionG2, SD_LRdistributionG2]])
@@ -265,6 +264,7 @@ if __name__ == '__main__':
     InputFile_path = os.path.join(os.getcwd(), InputFile_name)
     InputParameters = pd.read_csv(InputFile_path, delimiter = ',')
     InputDictionary = InputParameters.to_dict()
+    print(InputDictionary)
 
     # variables_fine = check_input_parameters(ntrials, nreversals, npp, reward_probability, full_speed, criterion, significance_cutoff, cohens_d, nreps, plot_folder)
     # if variables_fine == 0: break
@@ -355,7 +355,7 @@ if __name__ == '__main__':
                                                high_performance = full_speed, nreversals = nreversals,
                                                reward_probability = reward_probability, mean_LRdistribution = meanLR,
                                                SD_LRdistribution = sdLR, mean_inverseTempdistribution = meanInverseT,
-                                               SD_inverseTempdistribution = sdInverseT, True_correlation = True_correlation)
+                                               SD_inverseTempdistribution = sdInverseT)
             output.to_csv(os.path.join(output_folder, 'OutputEC{}SD{}TC{}T{}R{}N{}M.csv'.format(s_pooled, True_correlation, ntrials,
                                                                                       nreversals,
                                                                                       npp, nreps)))
