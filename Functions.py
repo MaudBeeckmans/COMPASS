@@ -297,8 +297,8 @@ def likelihood(parameter_set, data):
         if np.abs(retransformed_invT) > 99:
             # loglikelihoods = np.array([-999, -999])
             summed_logL = -9999
-            break
-        else: loglikelihoods = stimulus_weights*retransformed_invT - np.log(np.sum((np.exp(stimulus_weights[0]*retransformed_invT)+np.exp(stimulus_weights[1]*retransformed_invT))))
+            break 
+        else: loglikelihoods = np.log(softmax(values = stimulus_weights, inverse_temperature = retransformed_invT))
 
         #then select the probability of the actual response given the parameter set
         current_loglikelihood = loglikelihoods[response]
