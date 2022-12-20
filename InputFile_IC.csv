@@ -1,2 +1,4 @@
-ntrials;nreversals;npp;meanLR;sdLR;meanInverseTemperature;sdInverseTemperature;reward_probability;tau;nreps;full_speed;output_folder
-200;1;10;0.7;0.1;1.5;0.5;0.8;0.75;100;1;C:\Users\maudb
+ntrials,nreversals,npp,meanLR,sdLR,meanInverseTemperature,sdInverseTemperature,reward_probability,tau,nreps,full_speed,output_folder
+90,5,150,0.55,0.1,1.5,0.5,0.9,0.75,250,1,/Users/pieter/Desktop/Compass_results/pp150
+90,5,100,0.55,0.1,1.5,0.5,0.9,0.75,250,1,/Users/pieter/Desktop/Compass_results/pp100
+90,5,50,0.55,0.1,1.5,0.5,0.9,0.75,250,1,/Users/pieter/Desktop/Compass_results/pp50
